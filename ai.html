@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-	<title>Mohan Kumar K | Creative Space</title>
+	<title>AI Assistant | Mohan Kumar K</title>
 	<!-- PWA & Mobile Optimizations (Android, iOS, Windows) -->
 	<meta name="theme-color" content="#040e09">
 	<meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,7 +19,7 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 	<link rel="stylesheet" href="style.css">
 	<script src="theme.js"></script>
-	<!-- MK Creative AI Chat Widget -->
+	<!-- MK Creative AI Chat Engine -->
 	<script src="chat.js" defer></script>
 	<!-- Google Analytics (Visitor Monitoring) -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
@@ -97,11 +97,11 @@
 			<span class="brand-name">Mohan</span>
 		</div>
 		<nav class="tabs">
-			<a href="index.html" id="tab-home" class="tab-link active">Home</a>
+			<a href="index.html" id="tab-home" class="tab-link">Home</a>
 			<a href="socials.html" id="tab-socials" class="tab-link">Socials</a>
 			<a href="achievements.html" id="tab-achievements" class="tab-link">Achievements</a>
 			<a href="files.html" id="tab-files" class="tab-link">Shared Files</a>
-			<a href="ai.html" id="tab-ai" class="tab-link">AI Assistant</a>
+			<a href="ai.html" id="tab-ai" class="tab-link active">AI Assistant</a>
 		</nav>
 		<div class="header-actions">
 			<div class="live-clock" id="live-clock" title="Current Time">
@@ -121,126 +121,44 @@
 	<!-- Main Content Area -->
 	<main>
 		<div id="content-area">
-			<!-- Home Tab Content -->
-			<div id="panel-home" class="tab-panel active">
-				<div class="dashboard-grid">
-					<!-- Main Welcome/Intro Window -->
-					<div class="window-card intro-window">
-						<div class="window-header">
-							<span class="dot red"></span>
-							<span class="dot yellow"></span>
-							<span class="dot green"></span>
-						</div>
-						<div class="window-body home-intro">
-							<div class="home-intro-content">
-								<h1
-									style="background: linear-gradient(120deg, var(--accent-secondary), var(--accent-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 15px;">
-									Hello &amp; Welcome.
-								</h1>
-								<p>
-									I'm <strong>Mohan Kumar K</strong>. This interactive workspace serves as a personal
-									showcase for my creative projects, key milestones, and shared files. Take your time
-									to browse the layout—each window is a preview of what you can discover here. Stay a
-									while to explore, grab any resources you need, and let's connect.
-								</p>
+			<!-- AI Tab Content -->
+			<div id="panel-ai" class="tab-panel active">
+				<div class="liquid-glass-chat">
+					<!-- Header -->
+					<div class="chat-header">
+						<div class="chat-brand">
+							<div class="bot-avatar">
+								<i class="fas fa-robot"></i>
 							</div>
-							<!-- 3D Rotating Internet Globe (Embedded Background Hologram) -->
-							<div class="globe-card-bg-container" aria-hidden="true">
-								<div class="globe-wrapper">
-									<div class="globe-sphere">
-										<!-- Luminous Atmospheric Corona -->
-										<div class="globe-atmosphere"></div>
-										<!-- Core Sphere -->
-										<div class="globe-core"></div>
-										<!-- Rotating Longitude & Latitude Wireframe Rings -->
-										<div class="globe-grid">
-											<div class="globe-lat-ring ring-lat-1"></div>
-											<div class="globe-lat-ring ring-lat-2"></div>
-											<div class="globe-lat-ring ring-lat-3"></div>
-											<div class="globe-long-ring ring-long-1"></div>
-											<div class="globe-long-ring ring-long-2"></div>
-											<div class="globe-long-ring ring-long-3"></div>
-											<div class="globe-long-ring ring-long-4"></div>
-										</div>
-										<!-- Orbital Satellite Communication Rings -->
-										<div class="globe-orbit-ring orbit-ring-1">
-											<div class="globe-satellite sat-1"></div>
-										</div>
-										<div class="globe-orbit-ring orbit-ring-2">
-											<div class="globe-satellite sat-2"></div>
-										</div>
-										<!-- Pulsing Internet Data Nodes -->
-										<div class="globe-node node-1"></div>
-										<div class="globe-node node-2"></div>
-										<div class="globe-node node-3"></div>
-										<div class="globe-node node-4"></div>
-									</div>
-								</div>
+							<div class="chat-title-info">
+								<h3>AI Assistant</h3>
+								<span class="chat-status">
+									<span class="status-dot"></span>
+									<span>Online</span>
+								</span>
 							</div>
 						</div>
 					</div>
 
-					<!-- Socials Preview Window (Clickable) -->
-					<div class="window-card clickable preview-window" onclick="window.location.href = 'socials.html'">
-						<div class="window-header">
-							<span class="dot red"></span>
-							<span class="dot yellow"></span>
-							<span class="dot green"></span>
-						</div>
-						<div class="window-body">
-							<h2>Socials</h2>
-							<p>Find me on Instagram, YouTube, or get in touch directly via email.</p>
-							<div class="preview-content">
-								<i class="fab fa-instagram social-icon insta-icon" style="margin-right: 15px;"></i>
-								<i class="fab fa-youtube social-icon yt-icon" style="margin-right: 15px;"></i>
-								<i class="fas fa-envelope social-icon email-icon"></i>
-							</div>
-							<div class="preview-footer">
-								<span>Connect</span>
-								<i class="fas fa-arrow-right"></i>
-							</div>
-						</div>
+					<!-- Chat Area -->
+					<div id="tab-chat-messages" class="chat-messages-area">
+						<!-- Welcome message loaded by JS -->
 					</div>
 
-					<!-- Achievements Preview Window (Clickable) -->
-					<div class="window-card clickable preview-window"
-						onclick="window.location.href = 'achievements.html'">
-						<div class="window-header">
-							<span class="dot red"></span>
-							<span class="dot yellow"></span>
-							<span class="dot green"></span>
-						</div>
-						<div class="window-body">
-							<h2>Achievements</h2>
-							<p>View the history of my major milestones and recognition.</p>
-							<div class="preview-content">
-								<i class="fas fa-award" style="color: #ffbd2e;"></i>
-							</div>
-							<div class="preview-footer">
-								<span>View Milestones</span>
-								<i class="fas fa-arrow-right"></i>
-							</div>
-						</div>
+					<!-- Typing Indicator -->
+					<div id="tab-chat-typing" class="chat-typing-indicator" style="display: none;">
+						<span class="typing-dot"></span>
+						<span class="typing-dot"></span>
+						<span class="typing-dot"></span>
 					</div>
 
-					<!-- Shared Files Preview Window (Clickable) -->
-					<div class="window-card clickable preview-window" onclick="window.location.href = 'files.html'">
-						<div class="window-header">
-							<span class="dot red"></span>
-							<span class="dot yellow"></span>
-							<span class="dot green"></span>
-						</div>
-						<div class="window-body">
-							<h2>Shared Files</h2>
-							<p>Access downloadable resources, project templates, and materials.</p>
-							<div class="preview-content">
-								<i class="fas fa-folder-open" style="color: var(--accent-primary);"></i>
-							</div>
-							<div class="preview-footer">
-								<span>Access Files</span>
-								<i class="fas fa-arrow-right"></i>
-							</div>
-						</div>
+					<!-- Input Footer -->
+					<div class="chat-footer">
+						<textarea id="tab-chat-input" placeholder="Ask me about Mohan Kumar K's workspace..." rows="1"
+							onkeydown="handleChatInputKey(event)"></textarea>
+						<button id="tab-chat-send-btn" onclick="sendChatMessage()">
+							<i class="fas fa-paper-plane"></i>
+						</button>
 					</div>
 				</div>
 			</div>

@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-	<title>Mohan Kumar K | Creative Space</title>
+	<title>Shared Files | Mohan Kumar K</title>
 	<!-- PWA & Mobile Optimizations (Android, iOS, Windows) -->
 	<meta name="theme-color" content="#040e09">
 	<meta name="apple-mobile-web-app-capable" content="yes">
@@ -25,7 +25,7 @@
 	<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
 	<script>
 		window.dataLayer = window.dataLayer || [];
-		function gtag() { dataLayer.push(arguments); }
+		function gtag(){dataLayer.push(arguments);}
 		gtag('js', new Date());
 		gtag('config', 'G-XXXXXXXXXX');
 	</script>
@@ -97,10 +97,10 @@
 			<span class="brand-name">Mohan</span>
 		</div>
 		<nav class="tabs">
-			<a href="index.html" id="tab-home" class="tab-link active">Home</a>
+			<a href="index.html" id="tab-home" class="tab-link">Home</a>
 			<a href="socials.html" id="tab-socials" class="tab-link">Socials</a>
 			<a href="achievements.html" id="tab-achievements" class="tab-link">Achievements</a>
-			<a href="files.html" id="tab-files" class="tab-link">Shared Files</a>
+			<a href="files.html" id="tab-files" class="tab-link active">Shared Files</a>
 			<a href="ai.html" id="tab-ai" class="tab-link">AI Assistant</a>
 		</nav>
 		<div class="header-actions">
@@ -121,127 +121,66 @@
 	<!-- Main Content Area -->
 	<main>
 		<div id="content-area">
-			<!-- Home Tab Content -->
-			<div id="panel-home" class="tab-panel active">
-				<div class="dashboard-grid">
-					<!-- Main Welcome/Intro Window -->
-					<div class="window-card intro-window">
-						<div class="window-header">
-							<span class="dot red"></span>
-							<span class="dot yellow"></span>
-							<span class="dot green"></span>
+			<!-- Shared Files Tab Content -->
+			<div id="panel-files" class="tab-panel active">
+				<div class="glass-panel" style="text-align: center;">
+					<h2 class="section-title">Shared Files</h2>
+					<p class="section-subtitle">Access downloadable asset packages, design templates, and creative resources.</p>
+
+					<div class="files-grid">
+						<!-- Card 1 (Resource ZIP) -->
+						<div class="file-card zip">
+							<span class="file-badge">ZIP</span>
+							<div>
+								<i class="fas fa-file-archive file-icon"></i>
+								<h3 class="file-title">Creative Asset Pack</h3>
+								<p class="file-desc">A complete package of editing assets, icons, overlays, and design
+									materials to kickstart your creative projects.</p>
+							</div>
+							<a href="https://drive.google.com/drive/folders/1QNdvQtTCcnmPNPjpo5ioOtRX_u_YxdJH"
+								target="_blank" class="file-action">
+								<span>Access Asset Pack</span>
+								<i class="fas fa-arrow-right"></i>
+							</a>
 						</div>
-						<div class="window-body home-intro">
-							<div class="home-intro-content">
-								<h1
-									style="background: linear-gradient(120deg, var(--accent-secondary), var(--accent-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 15px;">
-									Hello &amp; Welcome.
-								</h1>
-								<p>
-									I'm <strong>Mohan Kumar K</strong>. This interactive workspace serves as a personal
-									showcase for my creative projects, key milestones, and shared files. Take your time
-									to browse the layout—each window is a preview of what you can discover here. Stay a
-									while to explore, grab any resources you need, and let's connect.
-								</p>
+
+						<!-- Card 2 (Guide PDF) -->
+						<div class="file-card pdf">
+							<span class="file-badge">PDF</span>
+							<div>
+								<i class="fas fa-file-pdf file-icon"></i>
+								<h3 class="file-title">Complete Guidebooks</h3>
+								<p class="file-desc">Exclusive PDF documents, chapters, and resources detailings tips,
+									tutorials, and workflow guidelines.</p>
 							</div>
-							<!-- 3D Rotating Internet Globe (Embedded Background Hologram) -->
-							<div class="globe-card-bg-container" aria-hidden="true">
-								<div class="globe-wrapper">
-									<div class="globe-sphere">
-										<!-- Luminous Atmospheric Corona -->
-										<div class="globe-atmosphere"></div>
-										<!-- Core Sphere -->
-										<div class="globe-core"></div>
-										<!-- Rotating Longitude & Latitude Wireframe Rings -->
-										<div class="globe-grid">
-											<div class="globe-lat-ring ring-lat-1"></div>
-											<div class="globe-lat-ring ring-lat-2"></div>
-											<div class="globe-lat-ring ring-lat-3"></div>
-											<div class="globe-long-ring ring-long-1"></div>
-											<div class="globe-long-ring ring-long-2"></div>
-											<div class="globe-long-ring ring-long-3"></div>
-											<div class="globe-long-ring ring-long-4"></div>
-										</div>
-										<!-- Orbital Satellite Communication Rings -->
-										<div class="globe-orbit-ring orbit-ring-1">
-											<div class="globe-satellite sat-1"></div>
-										</div>
-										<div class="globe-orbit-ring orbit-ring-2">
-											<div class="globe-satellite sat-2"></div>
-										</div>
-										<!-- Pulsing Internet Data Nodes -->
-										<div class="globe-node node-1"></div>
-										<div class="globe-node node-2"></div>
-										<div class="globe-node node-3"></div>
-										<div class="globe-node node-4"></div>
-									</div>
-								</div>
+							<a href="https://drive.google.com/drive/folders/1QNdvQtTCcnmPNPjpo5ioOtRX_u_YxdJH"
+								target="_blank" class="file-action">
+								<span>Access Guides</span>
+								<i class="fas fa-arrow-right"></i>
+							</a>
+						</div>
+
+						<!-- Card 3 (LUTs / Cube) -->
+						<div class="file-card cube">
+							<span class="file-badge">LUT</span>
+							<div>
+								<i class="fas fa-sliders-h file-icon"></i>
+								<h3 class="file-title">Color Grading LUTs</h3>
+								<p class="file-desc">Professional grading profiles (.CUBE format) to give your videos
+									and photos a premium, cinematic look.</p>
 							</div>
+							<a href="https://drive.google.com/drive/folders/1QNdvQtTCcnmPNPjpo5ioOtRX_u_YxdJH"
+								target="_blank" class="file-action">
+								<span>Access LUTs</span>
+								<i class="fas fa-arrow-right"></i>
+							</a>
 						</div>
 					</div>
 
-					<!-- Socials Preview Window (Clickable) -->
-					<div class="window-card clickable preview-window" onclick="window.location.href = 'socials.html'">
-						<div class="window-header">
-							<span class="dot red"></span>
-							<span class="dot yellow"></span>
-							<span class="dot green"></span>
-						</div>
-						<div class="window-body">
-							<h2>Socials</h2>
-							<p>Find me on Instagram, YouTube, or get in touch directly via email.</p>
-							<div class="preview-content">
-								<i class="fab fa-instagram social-icon insta-icon" style="margin-right: 15px;"></i>
-								<i class="fab fa-youtube social-icon yt-icon" style="margin-right: 15px;"></i>
-								<i class="fas fa-envelope social-icon email-icon"></i>
-							</div>
-							<div class="preview-footer">
-								<span>Connect</span>
-								<i class="fas fa-arrow-right"></i>
-							</div>
-						</div>
-					</div>
-
-					<!-- Achievements Preview Window (Clickable) -->
-					<div class="window-card clickable preview-window"
-						onclick="window.location.href = 'achievements.html'">
-						<div class="window-header">
-							<span class="dot red"></span>
-							<span class="dot yellow"></span>
-							<span class="dot green"></span>
-						</div>
-						<div class="window-body">
-							<h2>Achievements</h2>
-							<p>View the history of my major milestones and recognition.</p>
-							<div class="preview-content">
-								<i class="fas fa-award" style="color: #ffbd2e;"></i>
-							</div>
-							<div class="preview-footer">
-								<span>View Milestones</span>
-								<i class="fas fa-arrow-right"></i>
-							</div>
-						</div>
-					</div>
-
-					<!-- Shared Files Preview Window (Clickable) -->
-					<div class="window-card clickable preview-window" onclick="window.location.href = 'files.html'">
-						<div class="window-header">
-							<span class="dot red"></span>
-							<span class="dot yellow"></span>
-							<span class="dot green"></span>
-						</div>
-						<div class="window-body">
-							<h2>Shared Files</h2>
-							<p>Access downloadable resources, project templates, and materials.</p>
-							<div class="preview-content">
-								<i class="fas fa-folder-open" style="color: var(--accent-primary);"></i>
-							</div>
-							<div class="preview-footer">
-								<span>Access Files</span>
-								<i class="fas fa-arrow-right"></i>
-							</div>
-						</div>
-					</div>
+					<a href="https://drive.google.com/drive/folders/1QNdvQtTCcnmPNPjpo5ioOtRX_u_YxdJH" target="_blank"
+						class="drive-button">
+						<i class="fas fa-folder-open"></i> Browse All Files
+					</a>
 				</div>
 			</div>
 		</div>
@@ -265,8 +204,7 @@
 					<input type="email" id="feedback-email" name="email" placeholder="Your Email (Optional)">
 				</div>
 				<div class="feedback-input-group">
-					<textarea id="feedback-message" name="message"
-						placeholder="Describe your experience or suggest improvements..." required rows="4"></textarea>
+					<textarea id="feedback-message" name="message" placeholder="Describe your experience or suggest improvements..." required rows="4"></textarea>
 				</div>
 				<button type="submit" class="feedback-submit-btn">Send Feedback</button>
 				<div id="feedback-status" class="feedback-status-msg"></div>
