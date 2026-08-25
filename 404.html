@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Redirecting...</title>
+	<script>
+		// SPA 404 Fallback Router
+		(function() {
+			var path = window.location.pathname;
+			var hash = window.location.hash;
+			var search = window.location.search;
+			// Extract clean segment
+			var segment = path.replace(/^\//, '').replace(/\.html$/, '');
+			if (segment) {
+				sessionStorage.setItem('spa_redirect', '/' + segment + search + hash);
+			}
+			window.location.replace('/' + (segment ? '#' + segment : ''));
+		})();
+	</script>
+</head>
+<body>
+</body>
+</html>
