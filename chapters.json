@@ -1,0 +1,29 @@
+[
+  {
+    "id": "chapter-1",
+    "season": "Season 01",
+    "tag": "Chapter 01",
+    "title": "MITM Attack Demonstration (Project Report)",
+    "description": "Academic report and network lab demonstration notes covering Modular Man-in-the-Middle attacks, packet inspection, wireless monitoring, and security mitigations.",
+    "files": [
+      {
+        "id": "file-1-1",
+        "category": "report",
+        "badge": "REPORT / PDF",
+        "title": "Project Report: MITM Attack Demonstration",
+        "description": "Academic report covering the Modular Man-in-the-Middle Attack, architecture diagrams, wireless monitor mode, and live packet inspection. By BCA students: Darshan, Mohan Kumar K, and Nandan.",
+        "url": "https://drive.google.com/file/d/1YKlLdlNDRAIJT9tbSFB27uVElkxUvBIR/view?usp=drive_link",
+        "actionText": "Access Report (PDF)"
+      },
+      {
+        "id": "file-1-2",
+        "category": "assets",
+        "badge": "LAB ASSETS",
+        "title": "Chapter 1: Network Lab Notes & Captures",
+        "description": "Bettercap execution syntax, wlan0 monitor mode instructions, network packet capture logs, and architecture reference diagrams.",
+        "url": "https://docs.google.com/document/d/1VBCWzZ4dHmxmgwYKDy2I85FO4nLGcZZe/edit?usp=drive_link&ouid=111476900821792261144&rtpof=true&sd=true",
+        "actionText": "Access Lab Files"
+      }
+    ]
+  }
+]
