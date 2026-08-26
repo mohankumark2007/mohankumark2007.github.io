@@ -583,7 +583,7 @@
 	}
 
 	function checkAdminSession() {
-		const sessionRaw = sessionStorage.getItem('mk_admin_session');
+		const sessionRaw = localStorage.getItem('mk_admin_session');
 		const loginView = document.getElementById('admin-login-view');
 		const dashView = document.getElementById('admin-dashboard-view');
 
@@ -629,8 +629,8 @@
 		const passVal = passInput.value;
 
 		// Brute force rate-limiting check
-		const attempts = parseInt(sessionStorage.getItem('mk_login_fail_count') || '0', 10);
-		const lockUntil = parseInt(sessionStorage.getItem('mk_login_lock_time') || '0', 10);
+		const attempts = parseInt(localStorage.getItem('mk_login_fail_count') || '0', 10);
+		const lockUntil = parseInt(localStorage.getItem('mk_login_lock_time') || '0', 10);
 
 		if (Date.now() < lockUntil) {
 			const remainingSec = Math.ceil((lockUntil - Date.now()) / 1000);
@@ -651,14 +651,14 @@
 
 		if (isDefaultMatch || isHashMatch) {
 			// Successful login - clear rate limits
-			sessionStorage.removeItem('mk_login_fail_count');
-			sessionStorage.removeItem('mk_login_lock_time');
+			localStorage.removeItem('mk_login_fail_count');
+			localStorage.removeItem('mk_login_lock_time');
 
 			const sessionData = {
 				user: userVal,
 				exp: Date.now() + 3 * 60 * 60 * 1000 // 3 hours session
 			};
-			sessionStorage.setItem('mk_admin_session', JSON.stringify(sessionData));
+			localStorage.setItem('mk_admin_session', JSON.stringify(sessionData));
 
 			if (statusMsg) {
 				statusMsg.textContent = 'Authenticated. Unlocking portal...';
@@ -674,10 +674,10 @@
 		} else {
 			// Failed attempt
 			const newAttempts = attempts + 1;
-			sessionStorage.setItem('mk_login_fail_count', newAttempts.toString());
+			localStorage.setItem('mk_login_fail_count', newAttempts.toString());
 
 			if (newAttempts >= 5) {
-				sessionStorage.setItem('mk_login_lock_time', (Date.now() + 180000).toString()); // 3 min lockout
+				localStorage.setItem('mk_login_lock_time', (Date.now() + 180000).toString()); // 3 min lockout
 				if (statusMsg) {
 					statusMsg.textContent = '5 failed attempts. Rate limited for 3 minutes.';
 					statusMsg.className = 'admin-status-message error';
@@ -694,7 +694,7 @@
 	};
 
 	window.adminLogout = function () {
-		sessionStorage.removeItem('mk_admin_session');
+		localStorage.removeItem('mk_admin_session');
 		checkAdminSession();
 		window.showToast('Admin session terminated.', 'check');
 	};
