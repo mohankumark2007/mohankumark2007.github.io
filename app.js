@@ -354,7 +354,7 @@
 					submitBtn.textContent = 'Sending...';
 				}
 
-				fetch('https://formsubmit.co/ajax/15854c4f9954860278f854a928764d04', {
+				fetch('https://formspree.io/f/xbgrnqvj', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
