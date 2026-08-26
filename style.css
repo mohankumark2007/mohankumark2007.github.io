@@ -1948,6 +1948,7 @@ main {
 	}
 	.brand { order: 1; }
 	.header-actions { order: 2; }
+	.live-clock { display: none; }
 	.tabs {
 		order: 3;
 		width: 100%;
