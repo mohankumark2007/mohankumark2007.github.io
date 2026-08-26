@@ -73,28 +73,64 @@
 
 	// ─── DIRECT GEMINI API CALL ──────────────────────────────────
 	async function callGeminiAPI(messageText) {
-		try {
-			const url = 'https://mohan-chatbot.mohan7gen.workers.dev';
-			const response = await fetch(url, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ message: messageText })
-			});
+		conversationHistory.push({
+			role: "user",
+			parts: [{ text: messageText }]
+		});
 
-			if (!response.ok) {
-				throw new Error(`HTTP ${response.status}`);
-			}
-
-			const data = await response.json();
-			if (data.reply) {
-				return data.reply;
-			} else {
-				throw new Error(data.error || "Failed to get a response");
-			}
-		} catch (err) {
-			console.error('Chatbot Worker Error:', err);
-			throw new Error("Neural net connection failed.");
+		if (conversationHistory.length > 20) {
+			conversationHistory = conversationHistory.slice(-20);
 		}
+
+		const payload = {
+			systemInstruction: {
+				parts: [{ text: SYSTEM_PROMPT }]
+			},
+			contents: conversationHistory,
+			generationConfig: {
+				temperature: 0.7,
+				maxOutputTokens: 800
+			}
+		};
+
+		const apiKey = getActiveKey();
+		let lastError = null;
+
+		for (const model of GEMINI_MODELS) {
+			try {
+				const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+				const response = await fetch(url, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(payload)
+				});
+
+				if (!response.ok) {
+					const errData = await response.json().catch(() => ({}));
+					const errMsg = errData.error?.message || `HTTP ${response.status}`;
+					throw new Error(errMsg);
+				}
+
+				const data = await response.json();
+				const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+				if (replyText) {
+					conversationHistory.push({
+						role: "model",
+						parts: [{ text: replyText }]
+					});
+					return replyText;
+				}
+			} catch (err) {
+				console.warn(`Gemini model ${model} fallback:`, err.message);
+				lastError = err;
+			}
+		}
+
+		conversationHistory.pop();
+		throw lastError || new Error("Failed to get response from Gemini AI");
 	}
 
 	// ─── MESSAGE RENDERING ────────────────────────────────────────
