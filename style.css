@@ -2889,3 +2889,102 @@ a:focus-visible,
 	}
 }
 
+
+/* ─── DEEP WEB TERMINAL VERIFICATION ─── */
+.deep-web-theme {
+    background: rgba(4, 14, 9, 0.95);
+    border: 1px solid #00ff41;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2), inset 0 0 30px rgba(0, 255, 65, 0.1);
+    font-family: 'Courier New', Courier, monospace;
+}
+.terminal-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+    background: #000;
+    gap: 6px;
+}
+.terminal-header .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+}
+.terminal-title {
+    margin-left: auto;
+    color: #00ff41;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+}
+.terminal-body {
+    padding: 20px;
+    color: #00ff41;
+}
+.terminal-text {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+}
+.text-warning {
+    color: #ffcc00;
+    text-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+}
+.terminal-form {
+    margin-top: 20px;
+}
+.terminal-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.terminal-prompt {
+    color: #00ff41;
+    font-weight: bold;
+}
+.terminal-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #00ff41;
+    color: #00ff41;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    flex: 1;
+    outline: none;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+}
+.terminal-input:focus {
+    border-bottom-width: 2px;
+}
+.terminal-btn {
+    background: transparent;
+    color: #00ff41;
+    border: 1px solid #00ff41;
+    padding: 10px 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+}
+.terminal-btn:hover {
+    background: #00ff41;
+    color: #000;
+}
+.terminal-status {
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+    min-height: 1.2rem;
+}
+.terminal-status.processing {
+    color: #00ff41;
+    animation: blinker 1s linear infinite;
+}
+.terminal-status.success {
+    color: #00ff41;
+}
+.terminal-status.error {
+    color: #ff003c;
+    text-shadow: 0 0 5px rgba(255, 0, 60, 0.5);
+}
+@keyframes blinker {
+    50% { opacity: 0; }
+}
