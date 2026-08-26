@@ -401,7 +401,6 @@
 	const DEFAULT_CHAPTERS = [
 		{
 			id: 'chapter-1',
-			season: 'Season 01',
 			tag: 'Chapter 01',
 			title: 'MITM Attack Demonstration (Project Report)',
 			description: 'Academic report and network lab demonstration notes covering Modular Man-in-the-Middle attacks, packet inspection, wireless monitoring, and security mitigations.',
@@ -767,16 +766,13 @@
 		if (!container) return;
 
 		// Update Stats
-		const seasonsSet = new Set(chaptersData.map(c => c.season || 'Season 1'));
 		let totalFiles = 0;
 		chaptersData.forEach(c => { totalFiles += (c.files ? c.files.length : 0); });
 
-		const statSeasons = document.getElementById('stat-seasons-count');
 		const statChapters = document.getElementById('stat-chapters-count');
 		const statFiles = document.getElementById('stat-files-count');
 		const statSync = document.getElementById('stat-sync-status');
 
-		if (statSeasons) statSeasons.textContent = seasonsSet.size;
 		if (statChapters) statChapters.textContent = chaptersData.length;
 		if (statFiles) statFiles.textContent = totalFiles;
 		if (statSync) {
@@ -800,7 +796,6 @@
 				<div class="admin-chapter-card" data-admin-ch-id="${chapter.id}">
 					<div class="admin-chapter-header">
 						<div class="admin-chapter-meta">
-							<span class="admin-season-badge">${chapter.season || 'Season 01'}</span>
 							<div class="admin-chapter-title-row">
 								<span class="admin-chapter-tag">${chapter.tag || 'Chapter'}</span>
 								<h4 class="admin-chapter-heading">${chapter.title}</h4>
@@ -866,7 +861,6 @@
 		const modal = document.getElementById('modal-chapter');
 		const titleEl = document.getElementById('modal-chapter-title');
 		const idInput = document.getElementById('input-chapter-id');
-		const seasonInput = document.getElementById('input-chapter-season');
 		const tagInput = document.getElementById('input-chapter-tag');
 		const headlineInput = document.getElementById('input-chapter-headline');
 		const descInput = document.getElementById('input-chapter-desc');
@@ -878,7 +872,6 @@
 			if (ch) {
 				if (titleEl) titleEl.textContent = 'Edit Chapter';
 				if (idInput) idInput.value = ch.id;
-				if (seasonInput) seasonInput.value = ch.season || 'Season 01';
 				if (tagInput) tagInput.value = ch.tag || '';
 				if (headlineInput) headlineInput.value = ch.title || '';
 				if (descInput) descInput.value = ch.description || '';
@@ -888,7 +881,6 @@
 			if (idInput) idInput.value = '';
 			const nextNum = chaptersData.length + 1;
 			const padNum = String(nextNum).padStart(2, '0');
-			if (seasonInput) seasonInput.value = 'Season 01';
 			if (tagInput) tagInput.value = `Chapter ${padNum}`;
 			if (headlineInput) headlineInput.value = '';
 			if (descInput) descInput.value = '';
@@ -905,7 +897,6 @@
 
 	window.adminSaveChapter = function () {
 		const idInput = document.getElementById('input-chapter-id');
-		const seasonInput = document.getElementById('input-chapter-season');
 		const tagInput = document.getElementById('input-chapter-tag');
 		const headlineInput = document.getElementById('input-chapter-headline');
 		const descInput = document.getElementById('input-chapter-desc');
