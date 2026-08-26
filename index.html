@@ -387,50 +387,51 @@
 					<h2 class="section-title">Shared Files &amp; Notes</h2>
 					<p class="section-subtitle">Access downloadable cybersecurity project reports, network analysis notes, and lab demonstration files.</p>
 
-					<!-- ================= CHAPTER 1 ================= -->
-					<div class="chapter-block scroll-reveal">
-						<div class="chapter-block-header">
-							<span class="chapter-block-tag">Chapter 01</span>
-							<h3 class="chapter-block-title">MITM Attack Demonstration (Project Report)</h3>
-						</div>
-						<div class="files-grid">
-							<!-- Chapter 1: Script / Project Report -->
-							<div class="file-card script scroll-reveal">
-								<span class="file-badge">REPORT / PDF</span>
-								<div>
-									<!-- PDF / Document Icon -->
-									<svg class="file-icon" viewBox="0 0 24 24" width="34" height="34" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-									<h3 class="file-title">Project Report: MITM Attack Demonstration</h3>
-									<p class="file-desc">Academic report covering the Modular Man-in-the-Middle Attack, architecture diagrams, wireless monitor mode, and live packet inspection. By BCA students: Darshan, Mohan Kumar K, and Nandan.</p>
-								</div>
-								<div class="file-card-footer">
-									<a href="https://drive.google.com/file/d/1YKlLdlNDRAIJT9tbSFB27uVElkxUvBIR/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="file-action">
-										<span>Access Report (PDF)</span>
-										<svg class="svg-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14m-6-6l6 6-6 6"/></svg>
-									</a>
-									<button class="file-copy-btn" onclick="copyTextToClipboard('https://drive.google.com/file/d/1YKlLdlNDRAIJT9tbSFB27uVElkxUvBIR/view?usp=drive_link', 'Report link copied!')" title="Copy Link">
-										<svg class="svg-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-									</button>
-								</div>
+					<!-- Dynamic Chapters Container (Auto-populated from chapters.json / Admin Engine) -->
+					<div id="chapters-dynamic-container">
+						<!-- ================= CHAPTER 1 (Default Static Fallback) ================= -->
+						<div class="chapter-block scroll-reveal" data-chapter-id="chapter-1">
+							<div class="chapter-block-header">
+								<span class="chapter-block-tag">Chapter 01</span>
+								<h3 class="chapter-block-title">MITM Attack Demonstration (Project Report)</h3>
 							</div>
-
-							<!-- Chapter 1: Lab Files & Capture Notes -->
-							<div class="file-card assets scroll-reveal">
-								<span class="file-badge">LAB ASSETS</span>
-								<div>
-									<!-- Archive / Shield Folder Icon -->
-									<svg class="file-icon" viewBox="0 0 24 24" width="34" height="34" fill="currentColor"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6 10h-4v-2h4v2zm0-4h-4v-2h4v2z"/></svg>
-									<h3 class="file-title">Chapter 1: Network Lab Notes &amp; Captures</h3>
-									<p class="file-desc">Bettercap execution syntax, wlan0 monitor mode instructions, network packet capture logs, and architecture reference diagrams.</p>
+							<div class="files-grid">
+								<!-- Chapter 1: Script / Project Report -->
+								<div class="file-card script scroll-reveal">
+									<span class="file-badge">REPORT / PDF</span>
+									<div>
+										<svg class="file-icon" viewBox="0 0 24 24" width="34" height="34" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+										<h3 class="file-title">Project Report: MITM Attack Demonstration</h3>
+										<p class="file-desc">Academic report covering the Modular Man-in-the-Middle Attack, architecture diagrams, wireless monitor mode, and live packet inspection. By BCA students: Darshan, Mohan Kumar K, and Nandan.</p>
+									</div>
+									<div class="file-card-footer">
+										<a href="https://drive.google.com/file/d/1YKlLdlNDRAIJT9tbSFB27uVElkxUvBIR/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="file-action">
+											<span>Access Report (PDF)</span>
+											<svg class="svg-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14m-6-6l6 6-6 6"/></svg>
+										</a>
+										<button class="file-copy-btn" onclick="copyTextToClipboard('https://drive.google.com/file/d/1YKlLdlNDRAIJT9tbSFB27uVElkxUvBIR/view?usp=drive_link', 'Report link copied!')" title="Copy Link">
+											<svg class="svg-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+										</button>
+									</div>
 								</div>
-								<div class="file-card-footer">
-									<a href="https://docs.google.com/document/d/1VBCWzZ4dHmxmgwYKDy2I85FO4nLGcZZe/edit?usp=drive_link&ouid=111476900821792261144&rtpof=true&sd=true" target="_blank" rel="noopener noreferrer" class="file-action">
-										<span>Access Lab Files</span>
-										<svg class="svg-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14m-6-6l6 6-6 6"/></svg>
-									</a>
-									<button class="file-copy-btn" onclick="copyTextToClipboard('https://docs.google.com/document/d/1VBCWzZ4dHmxmgwYKDy2I85FO4nLGcZZe/edit?usp=drive_link&ouid=111476900821792261144&rtpof=true&sd=true', 'Lab notes link copied!')" title="Copy Link">
-										<svg class="svg-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-									</button>
+
+								<!-- Chapter 1: Lab Files & Capture Notes -->
+								<div class="file-card assets scroll-reveal">
+									<span class="file-badge">LAB ASSETS</span>
+									<div>
+										<svg class="file-icon" viewBox="0 0 24 24" width="34" height="34" fill="currentColor"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6 10h-4v-2h4v2zm0-4h-4v-2h4v2z"/></svg>
+										<h3 class="file-title">Chapter 1: Network Lab Notes &amp; Captures</h3>
+										<p class="file-desc">Bettercap execution syntax, wlan0 monitor mode instructions, network packet capture logs, and architecture reference diagrams.</p>
+									</div>
+									<div class="file-card-footer">
+										<a href="https://docs.google.com/document/d/1VBCWzZ4dHmxmgwYKDy2I85FO4nLGcZZe/edit?usp=drive_link&ouid=111476900821792261144&rtpof=true&sd=true" target="_blank" rel="noopener noreferrer" class="file-action">
+											<span>Access Lab Files</span>
+											<svg class="svg-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14m-6-6l6 6-6 6"/></svg>
+										</a>
+										<button class="file-copy-btn" onclick="copyTextToClipboard('https://docs.google.com/document/d/1VBCWzZ4dHmxmgwYKDy2I85FO4nLGcZZe/edit?usp=drive_link&ouid=111476900821792261144&rtpof=true&sd=true', 'Lab notes link copied!')" title="Copy Link">
+											<svg class="svg-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+										</button>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -497,6 +498,319 @@
 					</div>
 				</div>
 			</section>
+
+			<!-- ============================================================
+			     PANEL 6: HIDDEN SECURE ADMIN PANEL (/admin)
+			     ============================================================ -->
+			<section id="panel-admin" class="tab-panel" role="tabpanel" aria-label="Admin Control Center" style="display: none;">
+				<div class="admin-wrapper">
+					
+					<!-- ─── 1. HIGH-SECURITY LOGIN GATE ─── -->
+					<div id="admin-login-view" class="admin-login-card glass-panel">
+						<div class="admin-shield-icon">
+							<svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+								<rect x="9" y="11" width="6" height="5" rx="1"/>
+								<path d="M10 11V9a2 2 0 1 1 4 0v2"/>
+							</svg>
+						</div>
+						<h2 class="admin-login-title">Admin Portal</h2>
+						<p class="admin-login-desc">Authorized personnel access only. Cryptographically protected session.</p>
+
+						<form id="admin-login-form" class="admin-form" onsubmit="event.preventDefault(); window.adminHandleLogin();">
+							<div class="admin-input-group">
+								<label for="admin-user-input">Username</label>
+								<div class="input-with-icon">
+									<svg class="input-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+									<input type="text" id="admin-user-input" autocomplete="username" placeholder="Admin username" required autofocus>
+								</div>
+							</div>
+
+							<div class="admin-input-group">
+								<label for="admin-pass-input">Password</label>
+								<div class="input-with-icon">
+									<svg class="input-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+									<input type="password" id="admin-pass-input" autocomplete="current-password" placeholder="••••••••••••" required>
+									<button type="button" class="password-toggle-btn" onclick="window.adminTogglePassVisibility()" title="Toggle password visibility">
+										<svg class="eye-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+									</button>
+								</div>
+							</div>
+
+							<div id="admin-login-status" class="admin-status-message"></div>
+
+							<button type="submit" id="admin-login-btn" class="btn btn-primary btn-block">
+								<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+								<span>Unlock Dashboard</span>
+							</button>
+						</form>
+						<div class="admin-login-footer">
+							<span class="crypto-badge">
+								<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+								SHA-256 / PBKDF2 Encrypted
+							</span>
+						</div>
+					</div>
+
+					<!-- ─── 2. AUTHENTICATED ADMIN DASHBOARD ─── -->
+					<div id="admin-dashboard-view" class="admin-dashboard glass-panel" style="display: none;">
+						
+						<!-- Dashboard Top Action Bar -->
+						<div class="admin-header-bar">
+							<div class="admin-title-area">
+								<div class="admin-badge-pill">
+									<span class="live-clock-dot"></span>
+									<span>SECURE ADMIN SESSION</span>
+								</div>
+								<h2 class="admin-headline">Content &amp; Chapter Manager</h2>
+							</div>
+
+							<div class="admin-header-buttons">
+								<button class="btn btn-primary btn-sm" onclick="window.adminOpenChapterModal()">
+									<svg class="svg-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+									<span>New Chapter</span>
+								</button>
+								<button class="btn btn-glass btn-sm" onclick="window.adminPublishToGitHub()" title="Commit changes live to GitHub repository" id="btn-github-sync">
+									<svg class="svg-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+									<span>Publish Live</span>
+								</button>
+								<button class="btn btn-glass btn-sm" onclick="window.adminOpenSettingsModal()" title="Security & API Settings">
+									<svg class="svg-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+									<span>Settings</span>
+								</button>
+								<button class="btn btn-danger btn-sm" onclick="window.adminLogout()" title="End Admin Session">
+									<svg class="svg-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+									<span>Logout</span>
+								</button>
+							</div>
+						</div>
+
+						<!-- Quick Stats Summary -->
+						<div class="admin-stats-grid">
+							<div class="stat-card">
+								<span class="stat-label">Seasons / Batches</span>
+								<span class="stat-value" id="stat-seasons-count">1</span>
+							</div>
+							<div class="stat-card">
+								<span class="stat-label">Active Chapters</span>
+								<span class="stat-value" id="stat-chapters-count">1</span>
+							</div>
+							<div class="stat-card">
+								<span class="stat-label">Total Files &amp; Resources</span>
+								<span class="stat-value" id="stat-files-count">2</span>
+							</div>
+							<div class="stat-card">
+								<span class="stat-label">Live State Sync</span>
+								<span class="stat-value text-accent" id="stat-sync-status">Ready</span>
+							</div>
+						</div>
+
+						<!-- Chapters & Items List -->
+						<div class="admin-content-section">
+							<div class="admin-section-header">
+								<h3>Configured Seasons &amp; Chapters</h3>
+								<p class="admin-subtext">Add chapters, update reports and lab assets, and customize categories and Drive links.</p>
+							</div>
+
+							<div id="admin-chapters-manager" class="admin-chapters-manager">
+								<!-- Rendered dynamically by app.js -->
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</section>
+
+			<!-- ─── ADMIN MODAL: CHAPTER CREATOR / EDITOR ─── -->
+			<div id="modal-chapter" class="admin-modal-overlay" style="display: none;">
+				<div class="admin-modal-card glass-panel">
+					<div class="modal-header">
+						<h3 id="modal-chapter-title">Create / Edit Chapter</h3>
+						<button class="modal-close-btn" onclick="window.adminCloseChapterModal()">&times;</button>
+					</div>
+					<form id="form-chapter" onsubmit="event.preventDefault(); window.adminSaveChapter();">
+						<input type="hidden" id="input-chapter-id">
+						
+						<div class="form-row-2">
+							<div class="admin-input-group">
+								<label for="input-chapter-season">Season / Period</label>
+								<input type="text" id="input-chapter-season" placeholder="e.g. Season 01, 2026 Academic" required>
+							</div>
+							<div class="admin-input-group">
+								<label for="input-chapter-tag">Chapter Tag</label>
+								<input type="text" id="input-chapter-tag" placeholder="e.g. Chapter 01, Chapter 02" required>
+							</div>
+						</div>
+
+						<div class="admin-input-group">
+							<label for="input-chapter-headline">Chapter Title</label>
+							<input type="text" id="input-chapter-headline" placeholder="e.g. MITM Attack Demonstration (Project Report)" required>
+						</div>
+
+						<div class="admin-input-group">
+							<label for="input-chapter-desc">Chapter Description (Optional)</label>
+							<textarea id="input-chapter-desc" rows="2" placeholder="Brief summary of the chapter's research, experiments, or contents..."></textarea>
+						</div>
+
+						<div class="modal-actions">
+							<button type="button" class="btn btn-glass" onclick="window.adminCloseChapterModal()">Cancel</button>
+							<button type="submit" class="btn btn-primary">Save Chapter</button>
+						</div>
+					</form>
+				</div>
+			</div>
+
+			<!-- ─── ADMIN MODAL: FILE / ASSET CREATOR & LIVE PREVIEW ─── -->
+			<div id="modal-file" class="admin-modal-overlay" style="display: none;">
+				<div class="admin-modal-card glass-panel modal-wide">
+					<div class="modal-header">
+						<h3 id="modal-file-title">Add Resource to Chapter</h3>
+						<button class="modal-close-btn" onclick="window.adminCloseFileModal()">&times;</button>
+					</div>
+					
+					<div class="modal-split-layout">
+						<!-- Form Left -->
+						<form id="form-file" class="modal-form-col" onsubmit="event.preventDefault(); window.adminSaveFile();">
+							<input type="hidden" id="input-file-chapter-id">
+							<input type="hidden" id="input-file-id">
+
+							<div class="admin-input-group">
+								<label for="input-file-category">Resource Category</label>
+								<select id="input-file-category" onchange="window.adminUpdateFilePreview()" required>
+									<option value="report">📄 Project Report / PDF</option>
+									<option value="assets">📦 Lab Assets &amp; Captures</option>
+									<option value="notes">📝 Security Notes / Guide</option>
+									<option value="code">💻 Source Code / Scripts</option>
+									<option value="video">🎥 Video Demonstration</option>
+									<option value="custom">✨ Custom Category</option>
+								</select>
+							</div>
+
+							<div class="admin-input-group" id="group-custom-badge" style="display: none;">
+								<label for="input-file-custom-badge">Custom Badge Text</label>
+								<input type="text" id="input-file-custom-badge" placeholder="e.g. SLIDES / KEYNOTE" oninput="window.adminUpdateFilePreview()">
+							</div>
+
+							<div class="admin-input-group">
+								<label for="input-file-title">File / Card Title</label>
+								<input type="text" id="input-file-title" placeholder="e.g. Project Report: Network Penetration" required oninput="window.adminUpdateFilePreview()">
+							</div>
+
+							<div class="admin-input-group">
+								<label for="input-file-desc">Detailed Description</label>
+								<textarea id="input-file-desc" rows="3" placeholder="Explain what research, architecture, or tools this file contains..." required oninput="window.adminUpdateFilePreview()"></textarea>
+							</div>
+
+							<div class="admin-input-group">
+								<label for="input-file-url">Google Drive or Download URL</label>
+								<input type="url" id="input-file-url" placeholder="https://drive.google.com/file/d/..." required oninput="window.adminUpdateFilePreview()">
+							</div>
+
+							<div class="admin-input-group">
+								<label for="input-file-action-text">Action Button Text</label>
+								<input type="text" id="input-file-action-text" placeholder="e.g. Access Report (PDF), Access Lab Files" required oninput="window.adminUpdateFilePreview()">
+							</div>
+
+							<div class="modal-actions">
+								<button type="button" class="btn btn-glass" onclick="window.adminCloseFileModal()">Cancel</button>
+								<button type="submit" class="btn btn-primary">Save Resource</button>
+							</div>
+						</form>
+
+						<!-- Live Preview Right -->
+						<div class="modal-preview-col">
+							<div class="preview-box-header">
+								<span class="preview-tag">LIVE VISITOR PREVIEW</span>
+								<span class="preview-sub">How this card looks in the #files tab</span>
+							</div>
+							<div class="preview-render-area">
+								<div id="file-card-live-preview" class="file-card script">
+									<span class="file-badge" id="preview-badge">REPORT / PDF</span>
+									<div>
+										<svg class="file-icon" viewBox="0 0 24 24" width="34" height="34" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+										<h3 class="file-title" id="preview-title">Resource Title Preview</h3>
+										<p class="file-desc" id="preview-desc">Resource description preview will update as you type in the form.</p>
+									</div>
+									<div class="file-card-footer">
+										<a href="#" class="file-action" id="preview-action-btn" onclick="return false;">
+											<span id="preview-action-label">Access Resource</span>
+											<svg class="svg-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14m-6-6l6 6-6 6"/></svg>
+										</a>
+										<button class="file-copy-btn" onclick="return false;" title="Copy Link">
+											<svg class="svg-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+			<!-- ─── ADMIN MODAL: SETTINGS & GITHUB SYNC ─── -->
+			<div id="modal-settings" class="admin-modal-overlay" style="display: none;">
+				<div class="admin-modal-card glass-panel">
+					<div class="modal-header">
+						<h3>Admin Security &amp; Sync Settings</h3>
+						<button class="modal-close-btn" onclick="window.adminCloseSettingsModal()">&times;</button>
+					</div>
+
+					<div class="settings-sections">
+						<!-- Section 1: Change Password -->
+						<div class="settings-block">
+							<h4>Change Admin Password</h4>
+							<p class="settings-desc">Update your cryptographic login password.</p>
+							<form id="form-change-password" onsubmit="event.preventDefault(); window.adminChangePassword();">
+								<div class="admin-input-group">
+									<label for="input-old-pass">Current Password</label>
+									<input type="password" id="input-old-pass" placeholder="••••••••" required>
+								</div>
+								<div class="admin-input-group">
+									<label for="input-new-pass">New Password (Min. 8 characters)</label>
+									<input type="password" id="input-new-pass" placeholder="New secure password" minlength="8" required>
+								</div>
+								<button type="submit" class="btn btn-glass btn-sm">Update Password</button>
+							</form>
+						</div>
+
+						<hr class="settings-divider">
+
+						<!-- Section 2: GitHub Auto-Sync Setup -->
+						<div class="settings-block">
+							<h4>GitHub Direct Deploy Token (Optional)</h4>
+							<p class="settings-desc">Save a GitHub Personal Access Token (PAT) with <code>repo</code> scope to allow one-click commits to <code>chapters.json</code> directly from the browser.</p>
+							<div class="admin-input-group">
+								<label for="input-github-token">GitHub Token (Stored only in your browser storage)</label>
+								<input type="password" id="input-github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+							</div>
+							<div class="settings-actions-inline">
+								<button type="button" class="btn btn-glass btn-sm" onclick="window.adminSaveGitHubToken()">Save Token</button>
+								<button type="button" class="btn btn-danger btn-sm" onclick="window.adminClearGitHubToken()">Remove Token</button>
+							</div>
+						</div>
+
+						<hr class="settings-divider">
+
+						<!-- Section 3: Data Backup / Restore -->
+						<div class="settings-block">
+							<h4>Data Backup &amp; Export</h4>
+							<p class="settings-desc">Download a local JSON backup of all chapters and resources.</p>
+							<div class="settings-actions-inline">
+								<button type="button" class="btn btn-glass btn-sm" onclick="window.adminExportData()">
+									<svg class="svg-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+									<span>Download chapters.json</span>
+								</button>
+								<button type="button" class="btn btn-danger btn-sm" onclick="window.adminResetDataToDefault()">Reset to Default</button>
+							</div>
+						</div>
+					</div>
+
+					<div class="modal-actions" style="margin-top: 24px;">
+						<button type="button" class="btn btn-primary" onclick="window.adminCloseSettingsModal()">Done</button>
+					</div>
+				</div>
+			</div>
 
 		</div>
 	</main>
