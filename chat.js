@@ -443,7 +443,7 @@
 	// ─── INIT ON DOM READY ───────────────────────────────────────
 	window.addEventListener("DOMContentLoaded", () => {
 		injectFloatingChat();
-		if (window.location.pathname === '/ai' || window.location.hash === '#ai') {
+		if (window.location.hash === '#ai' || window.location.pathname === '/ai') {
 			initializeTabChat();
 		}
 	});
