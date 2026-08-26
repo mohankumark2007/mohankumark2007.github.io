@@ -606,7 +606,7 @@ main {
 /* ── Dashboard Grid (Home View) ── */
 .dashboard-grid {
 	display: grid;
-	grid-template-columns: repeat(3, 1fr);
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 	gap: 20px;
 	width: 100%;
 }
@@ -926,8 +926,8 @@ main {
 	backdrop-filter: blur(20px);
 	-webkit-backdrop-filter: blur(20px);
 	border: 1px solid var(--glass-panel-border);
-	border-radius: 28px;
-	padding: 40px 38px;
+	border-radius: var(--radius-lg);
+	padding: 32px 30px;
 	width: 100%;
 	box-shadow: 0 16px 40px var(--glass-panel-shadow);
 }
@@ -1967,7 +1967,8 @@ main {
 
 	.bento-grid { grid-template-columns: 1fr; }
 	.files-grid { grid-template-columns: 1fr; }
-	.glass-panel { padding: 24px 18px; border-radius: 22px; }
+	.glass-panel { padding: 24px 18px; border-radius: var(--radius-lg); }
+	.window-body, .window-card.clickable .window-body { padding: 20px 16px; }
 	.section-title { font-size: 1.75rem; }
 
 	.timeline::after { left: 18px; }
