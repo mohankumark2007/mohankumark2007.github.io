@@ -612,10 +612,6 @@
 						<!-- Quick Stats Summary -->
 						<div class="admin-stats-grid">
 							<div class="stat-card">
-								<span class="stat-label">Seasons / Batches</span>
-								<span class="stat-value" id="stat-seasons-count">1</span>
-							</div>
-							<div class="stat-card">
 								<span class="stat-label">Active Chapters</span>
 								<span class="stat-value" id="stat-chapters-count">1</span>
 							</div>
@@ -632,8 +628,8 @@
 						<!-- Chapters & Items List -->
 						<div class="admin-content-section">
 							<div class="admin-section-header">
-								<h3>Configured Seasons &amp; Chapters</h3>
-								<p class="admin-subtext">Add chapters, update reports and lab assets, and customize categories and Drive links.</p>
+								<h3>Configured Chapters</h3>
+								<p class="admin-subtext">Add chapters, update reports and lab assets, and customize categories and Drive links. You can add as many chapters as you want!</p>
 							</div>
 
 							<div id="admin-chapters-manager" class="admin-chapters-manager">
@@ -655,11 +651,7 @@
 					<form id="form-chapter" onsubmit="event.preventDefault(); window.adminSaveChapter();">
 						<input type="hidden" id="input-chapter-id">
 						
-						<div class="form-row-2">
-							<div class="admin-input-group">
-								<label for="input-chapter-season">Season / Period</label>
-								<input type="text" id="input-chapter-season" placeholder="e.g. Season 01, 2026 Academic" required>
-							</div>
+						<div class="form-row-2" style="display: block;">
 							<div class="admin-input-group">
 								<label for="input-chapter-tag">Chapter Tag</label>
 								<input type="text" id="input-chapter-tag" placeholder="e.g. Chapter 01, Chapter 02" required>
