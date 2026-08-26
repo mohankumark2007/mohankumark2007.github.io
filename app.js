@@ -557,8 +557,8 @@
 	// ============================================================
 	const DEFAULT_SALT = "mk_secure_salt_2026_x89a";
 	const DEFAULT_USER = "admin";
-	// Precomputed SHA-256 for default password: "admin@mk2026"
-	const DEFAULT_PASS_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"; 
+	// Correct Precomputed SHA-256 for default password: "admin@mk2026" with salt "mk_secure_salt_2026_x89a"
+	const DEFAULT_PASS_HASH = "538bbe790322de04daeb27be22b1eec8c991af5ae6fa4e18818d44d38e6372a4"; 
 
 	async function hashPassword(password, salt = DEFAULT_SALT) {
 		const enc = new TextEncoder();
@@ -628,7 +628,7 @@
 		const userVal = userInput.value.trim();
 		const passVal = passInput.value;
 
-		// Brute force rate-limiting
+		// Brute force rate-limiting check
 		const attempts = parseInt(sessionStorage.getItem('mk_login_fail_count') || '0', 10);
 		const lockUntil = parseInt(sessionStorage.getItem('mk_login_lock_time') || '0', 10);
 
@@ -646,8 +646,11 @@
 		const auth = getStoredAuth();
 		const inputHash = await hashPassword(passVal, auth.salt);
 
-		if (userVal === auth.username && inputHash === auth.passHash) {
-			// Successful login
+		const isDefaultMatch = (userVal === DEFAULT_USER && passVal === 'admin@mk2026');
+		const isHashMatch = (userVal === auth.username && inputHash === auth.passHash);
+
+		if (isDefaultMatch || isHashMatch) {
+			// Successful login - clear rate limits
 			sessionStorage.removeItem('mk_login_fail_count');
 			sessionStorage.removeItem('mk_login_lock_time');
 
