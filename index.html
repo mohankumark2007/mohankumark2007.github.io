@@ -552,6 +552,30 @@
 						</div>
 					</div>
 
+					<!-- ─── DEEP WEB VERIFICATION STEP ─── -->
+					<div id="admin-verification-view" class="admin-login-card glass-panel deep-web-theme" style="display: none;">
+						<div class="terminal-header">
+							<span class="dot red"></span>
+							<span class="dot yellow"></span>
+							<span class="dot green"></span>
+							<span class="terminal-title">SYS_VERIFY</span>
+						</div>
+						<div class="terminal-body">
+							<p class="terminal-text">&gt; INITIALIZING SECURE HANDSHAKE...</p>
+							<p class="terminal-text">&gt; IDENTITY: ADMIN FOUND.</p>
+							<p class="terminal-text text-warning">&gt; SECONDARY CLEARANCE REQUIRED.</p>
+							
+							<form id="admin-verify-form" class="terminal-form" onsubmit="event.preventDefault(); window.adminHandleVerification();">
+								<div class="terminal-input-row">
+									<span class="terminal-prompt">root@system:~#</span>
+									<input type="password" id="admin-verify-input" class="terminal-input" placeholder="Enter Master Key" required>
+								</div>
+								<div id="admin-verify-status" class="terminal-status"></div>
+								<button type="submit" id="admin-verify-btn" class="terminal-btn">[ EXECUTE VERIFICATION ]</button>
+							</form>
+						</div>
+					</div>
+
 					<!-- ─── 2. AUTHENTICATED ADMIN DASHBOARD ─── -->
 					<div id="admin-dashboard-view" class="admin-dashboard glass-panel" style="display: none;">
 						
