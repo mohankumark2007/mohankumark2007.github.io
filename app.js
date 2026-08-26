@@ -586,6 +586,7 @@
 		const sessionRaw = localStorage.getItem('mk_admin_session');
 		const loginView = document.getElementById('admin-login-view');
 		const dashView = document.getElementById('admin-dashboard-view');
+		const verifyView = document.getElementById('admin-verification-view');
 
 		if (!loginView || !dashView) return;
 
@@ -602,10 +603,12 @@
 		if (isValid) {
 			loginView.style.display = 'none';
 			dashView.style.display = 'block';
+			if (verifyView) verifyView.style.display = 'none';
 			renderAdminChapters();
 		} else {
 			loginView.style.display = 'block';
 			dashView.style.display = 'none';
+			if (verifyView) verifyView.style.display = 'none';
 			const userInput = document.getElementById('admin-user-input');
 			if (userInput) userInput.focus();
 		}
@@ -654,11 +657,7 @@
 			localStorage.removeItem('mk_login_fail_count');
 			localStorage.removeItem('mk_login_lock_time');
 
-			const sessionData = {
-				user: userVal,
-				exp: Date.now() + 3 * 60 * 60 * 1000 // 3 hours session
-			};
-			localStorage.setItem('mk_admin_session', JSON.stringify(sessionData));
+			window._temp_admin_user = userVal;
 
 			if (statusMsg) {
 				statusMsg.textContent = 'Authenticated. Unlocking portal...';
@@ -668,8 +667,15 @@
 			setTimeout(() => {
 				if (passInput) passInput.value = '';
 				if (statusMsg) statusMsg.textContent = '';
-				checkAdminSession();
-				window.showToast('Welcome back, Admin!', 'check');
+				
+				const loginView = document.getElementById('admin-login-view');
+				const verifyView = document.getElementById('admin-verification-view');
+				if (loginView) loginView.style.display = 'none';
+				if (verifyView) {
+					verifyView.style.display = 'block';
+					const verifyInput = document.getElementById('admin-verify-input');
+					if (verifyInput) verifyInput.focus();
+				}
 			}, 300);
 		} else {
 			// Failed attempt
@@ -691,6 +697,60 @@
 		}
 
 		if (btn) btn.disabled = false;
+	};
+
+	window.adminHandleVerification = function () {
+		const keyInput = document.getElementById('admin-verify-input');
+		const statusMsg = document.getElementById('admin-verify-status');
+		const btn = document.getElementById('admin-verify-btn');
+		
+		if (!keyInput) return;
+		
+		const keyVal = keyInput.value.trim();
+		if (btn) btn.disabled = true;
+		
+		if (statusMsg) {
+			statusMsg.textContent = '> VERIFYING ENCRYPTION KEY...';
+			statusMsg.className = 'terminal-status processing';
+		}
+		
+		setTimeout(() => {
+			if (keyVal === 'mohan-core-2026') {
+				if (statusMsg) {
+					statusMsg.textContent = '> ACCESS GRANTED. DECRYPTING...';
+					statusMsg.className = 'terminal-status success';
+				}
+				
+				setTimeout(() => {
+					const sessionData = {
+						user: window._temp_admin_user || 'admin',
+						exp: Date.now() + 3 * 60 * 60 * 1000
+					};
+					localStorage.setItem('mk_admin_session', JSON.stringify(sessionData));
+					
+					keyInput.value = '';
+					statusMsg.textContent = '';
+					if (btn) btn.disabled = false;
+					
+					checkAdminSession();
+					window.showToast('Deep Web Verification Successful. Welcome Admin.', 'check');
+				}, 1000);
+			} else {
+				if (statusMsg) {
+					statusMsg.textContent = '> ERR: INVALID MASTER KEY. CONNECTION TERMINATED.';
+					statusMsg.className = 'terminal-status error';
+				}
+				setTimeout(() => {
+					const loginView = document.getElementById('admin-login-view');
+					const verifyView = document.getElementById('admin-verification-view');
+					if (verifyView) verifyView.style.display = 'none';
+					if (loginView) loginView.style.display = 'block';
+					keyInput.value = '';
+					statusMsg.textContent = '';
+					if (btn) btn.disabled = false;
+				}, 2000);
+			}
+		}, 1500);
 	};
 
 	window.adminLogout = function () {
