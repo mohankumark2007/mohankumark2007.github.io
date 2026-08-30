@@ -17,8 +17,9 @@
 
 	// Primary models — fastest first for minimum latency
 	const GEMINI_MODELS = [
-		"gemini-2.0-flash-lite",
-		"gemini-2.0-flash"
+		"gemini-3.5-flash-lite",
+		"gemini-flash-lite-latest",
+		"gemini-3.5-flash"
 	];
 
 	// ─── SYSTEM PROMPT (Model Persona & Workspace Knowledge) ──────
