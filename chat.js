@@ -254,11 +254,20 @@
 		if (stopBtn) stopBtn.style.display = 'inline-flex';
 
 		// Split into natural conversational sentence chunks for fluid pacing (Gemini Vega style)
-		const sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
+		// Max length is ~150 chars to avoid Android TTS bugs
+		let sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
 		
-		sentences.forEach((sentence, idx) => {
-			const sentenceText = sentence.trim();
-			if (!sentenceText) return;
+		function speakNextChunk(index) {
+			if (index >= sentences.length) {
+				if (stopBtn) stopBtn.style.display = 'none';
+				return;
+			}
+
+			const sentenceText = sentences[index].trim();
+			if (!sentenceText) {
+				speakNextChunk(index + 1);
+				return;
+			}
 
 			const utterance = new SpeechSynthesisUtterance(sentenceText);
 			// Gemini Vega Voice Tuning: Bright clarity, warm articulation, natural conversational cadence
@@ -270,21 +279,14 @@
 				utterance.voice = cachedVegaVoice;
 			}
 
-			utterance.onend = () => {
-				// Hide stop button if this is the last sentence
-				if (idx === sentences.length - 1 && stopBtn) {
-					stopBtn.style.display = 'none';
-				}
-			};
-			utterance.onerror = () => {
-				if (idx === sentences.length - 1 && stopBtn) {
-					stopBtn.style.display = 'none';
-				}
-			};
+			utterance.onend = () => speakNextChunk(index + 1);
+			utterance.onerror = () => speakNextChunk(index + 1); // skip and continue on error
 
 			window.utterances.push(utterance); // Prevent GC
 			window.speechSynthesis.speak(utterance);
-		});
+		}
+
+		speakNextChunk(0);
 	};
 
 	window.toggleVoiceAutoPlay = function (btnId = 'tab-chat-tts-btn') {
