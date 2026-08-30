@@ -698,7 +698,7 @@
 	}
 
 	function checkAdminSession() {
-		const sessionRaw = localStorage.getItem('mk_admin_session');
+		const sessionRaw = sessionStorage.getItem('mk_admin_session');
 		const loginView = document.getElementById('admin-login-view');
 		const dashView = document.getElementById('admin-dashboard-view');
 		const verifyView = document.getElementById('admin-verification-view');
@@ -841,7 +841,7 @@
 						user: window._temp_admin_user || 'admin',
 						exp: Date.now() + 3 * 60 * 60 * 1000
 					};
-					localStorage.setItem('mk_admin_session', JSON.stringify(sessionData));
+					sessionStorage.setItem('mk_admin_session', JSON.stringify(sessionData));
 					
 					keyInput.value = '';
 					statusMsg.textContent = '';
@@ -1391,6 +1391,60 @@
 		}
 	};
 
+	// ─── ADMIN TRAFFIC ANALYTICS ───
+	window.adminOpenAnalyticsModal = async function () {
+		const modal = document.getElementById('modal-analytics');
+		if (modal) modal.style.display = 'flex';
+		
+		const tbody = document.getElementById('analytics-table-body');
+		const totalEl = document.getElementById('analytics-total-visits');
+		const avgEl = document.getElementById('analytics-avg-duration');
+		
+		if (!tbody) return;
+		tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">Fetching encrypted telemetry from Cloudflare KV...</td></tr>';
+		
+		try {
+			// Master key required for analytics access
+			const verifyRes = await fetch('https://mohan-chatbot.mohan7gen.workers.dev', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ mode: 'analytics_view', key: 'mohan-core-2026' })
+			});
+			
+			if (verifyRes.ok) {
+				const data = await verifyRes.json();
+				if (data.metrics && data.metrics.length > 0) {
+					totalEl.textContent = data.metrics.length;
+					let totalDur = 0;
+					tbody.innerHTML = data.metrics.sort((a,b) => b.timestamp - a.timestamp).map(m => {
+						totalDur += (m.duration || 0);
+						const d = new Date(m.timestamp);
+						return `<tr style="border-bottom: 1px solid #222;">
+							<td style="padding: 8px;">${d.toLocaleDateString()} ${d.toLocaleTimeString()}</td>
+							<td style="padding: 8px; font-size: 0.8em; color: #888;">${m.ua || 'Unknown'}</td>
+							<td style="padding: 8px;">${m.screen || '?'}</td>
+							<td style="padding: 8px; color: #00ffcc;">${m.duration || 0}s</td>
+						</tr>`;
+					}).join('');
+					avgEl.textContent = Math.round(totalDur / data.metrics.length) + 's';
+				} else {
+					tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">No traffic logged yet.</td></tr>';
+					totalEl.textContent = '0';
+					avgEl.textContent = '0s';
+				}
+			} else {
+				throw new Error('Analytics access denied.');
+			}
+		} catch (e) {
+			tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color: #f43f5e;">Error: ${e.message}<br>Make sure Cloudflare KV is configured!</td></tr>`;
+		}
+	};
+
+	window.adminCloseAnalyticsModal = function () {
+		const modal = document.getElementById('modal-analytics');
+		if (modal) modal.style.display = 'none';
+	};
+
 	// ─── ADMIN SETTINGS & BACKUP ───
 	window.adminOpenSettingsModal = function () {
 		const modal = document.getElementById('modal-settings');
@@ -1674,10 +1728,30 @@
 		setInterval(measurePing, 10000);
 	}
 
+	// ─── TRAFFIC ANALYTICS TRACKER ───────────────────────────────
+	function initTrafficTracker() {
+		const sessionStart = Date.now();
+		const visitorData = {
+			ua: navigator.userAgent,
+			lang: navigator.language,
+			screen: `${window.screen.width}x${window.screen.height}`,
+			timestamp: sessionStart,
+			duration: 0
+		};
+
+		window.addEventListener('beforeunload', () => {
+			visitorData.duration = Math.round((Date.now() - sessionStart) / 1000);
+			const blob = new Blob([JSON.stringify({ mode: 'analytics_track', data: visitorData })], { type: 'application/json' });
+			// Ensure telemetry is sent even as page closes
+			navigator.sendBeacon('https://mohan-chatbot.mohan7gen.workers.dev', blob);
+		});
+	}
+
 	// ─── APP BOOTSTRAP ───────────────────────────────────────────
 	window.addEventListener('DOMContentLoaded', function () {
 		// 1. Initialize Adaptive 60/120 FPS Display Refresh Engine
 		initDisplayRefreshSync();
+		initTrafficTracker();
 
 		// 2. Load dynamic chapters data
 		loadChapters();
