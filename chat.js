@@ -248,19 +248,18 @@
 		const stopBtn = document.getElementById('tab-chat-tts-stop-btn');
 		if (stopBtn) stopBtn.style.display = 'none';
 
-		setTimeout(() => {
-			const clean = cleanTextForSpeech(text);
-			if (!clean) return;
+		const clean = cleanTextForSpeech(text);
+		if (!clean) return;
 
-			if (!cachedVegaVoice) {
-				cachedVegaVoice = findVegaVoice();
-			}
+		if (!cachedVegaVoice) {
+			cachedVegaVoice = findVegaVoice();
+		}
 
-			if (stopBtn) stopBtn.style.display = 'inline-flex';
+		if (stopBtn) stopBtn.style.display = 'inline-flex';
 
-			// Split into natural conversational sentence chunks for fluid pacing (Gemini Vega style)
-			// Max length is ~150 chars to avoid Android TTS bugs
-			let sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
+		// Split into natural conversational sentence chunks for fluid pacing (Gemini Vega style)
+		// Max length is ~150 chars to avoid Android TTS bugs
+		let sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
 		
 		function speakNextChunk(index) {
 			if (index >= sentences.length) {
@@ -292,7 +291,6 @@
 		}
 
 		speakNextChunk(0);
-		}, 50);
 	};
 
 	window.toggleVoiceAutoPlay = function (btnId = 'tab-chat-tts-btn') {
