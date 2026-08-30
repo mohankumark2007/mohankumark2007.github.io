@@ -3178,27 +3178,29 @@ a:focus-visible,
 .hud-tag {
 	color: #64748b;
 }
-.telemetry-cli-btn {
-	background: rgba(0, 255, 204, 0.1);
-	border: 1px solid rgba(0, 255, 204, 0.3);
-	color: #00ffcc;
-	border-radius: 7px;
-	padding: 3px 8px;
-	font-family: inherit;
-	font-size: 10.5px;
-	font-weight: 700;
-	cursor: pointer;
-	transition: all 0.2s ease;
-}
-.telemetry-cli-btn:hover {
-	background: #00ffcc;
-	color: #000;
-}
 @media (max-width: 768px) {
 	.telemetry-inner {
 		justify-content: center;
 		font-size: 10px;
 		text-align: center;
+		flex-wrap: wrap;
+		padding: 6px 12px;
+		gap: 8px;
+	}
+	.hud-item {
+		margin-bottom: 2px;
 	}
 }
 
+@media (max-width: 480px) {
+	.chat-footer-controls {
+		gap: 4px;
+	}
+	.chat-tool-btn {
+		width: 30px;
+		height: 30px;
+	}
+	.telemetry-hud {
+		bottom: 0; /* Attach directly to bottom */
+	}
+}

@@ -226,12 +226,22 @@
 			.trim();
 	}
 
+	window.utterances = []; // Global array to prevent garbage collection of utterances
+	window.stopAISpeech = function() {
+		if ('speechSynthesis' in window) {
+			window.speechSynthesis.cancel();
+			window.utterances = [];
+			const stopBtn = document.getElementById('tab-chat-tts-stop-btn');
+			if (stopBtn) stopBtn.style.display = 'none';
+		}
+	};
+
 	window.speakChatMessage = function (text) {
 		if (!('speechSynthesis' in window)) {
 			console.warn("Speech Synthesis not supported in this browser.");
 			return;
 		}
-		window.speechSynthesis.cancel(); // Stop ongoing speech
+		window.stopAISpeech(); // Stop ongoing speech
 
 		const clean = cleanTextForSpeech(text);
 		if (!clean) return;
@@ -239,6 +249,9 @@
 		if (!cachedVegaVoice) {
 			cachedVegaVoice = findVegaVoice();
 		}
+
+		const stopBtn = document.getElementById('tab-chat-tts-stop-btn');
+		if (stopBtn) stopBtn.style.display = 'inline-flex';
 
 		// Split into natural conversational sentence chunks for fluid pacing (Gemini Vega style)
 		const sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
@@ -257,6 +270,19 @@
 				utterance.voice = cachedVegaVoice;
 			}
 
+			utterance.onend = () => {
+				// Hide stop button if this is the last sentence
+				if (idx === sentences.length - 1 && stopBtn) {
+					stopBtn.style.display = 'none';
+				}
+			};
+			utterance.onerror = () => {
+				if (idx === sentences.length - 1 && stopBtn) {
+					stopBtn.style.display = 'none';
+				}
+			};
+
+			window.utterances.push(utterance); // Prevent GC
 			window.speechSynthesis.speak(utterance);
 		});
 	};
