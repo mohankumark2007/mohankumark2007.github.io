@@ -869,7 +869,7 @@
 	};
 
 	window.adminLogout = function () {
-		localStorage.removeItem('mk_admin_session');
+		sessionStorage.removeItem('mk_admin_session');
 		checkAdminSession();
 		window.showToast('Admin session terminated.', 'check');
 	};
@@ -1760,6 +1760,9 @@
 		};
 
 		window.addEventListener('beforeunload', () => {
+			// Security: Destroy admin session on refresh or close (Deep Web mode)
+			sessionStorage.removeItem('mk_admin_session');
+			
 			visitorData.duration = Math.round((Date.now() - sessionStart) / 1000);
 			const blob = new Blob([JSON.stringify({ mode: 'analytics_track', data: visitorData })], { type: 'application/json' });
 			// Ensure telemetry is sent even as page closes
