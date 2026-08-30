@@ -672,7 +672,7 @@
 	// ============================================================
 	const DEFAULT_SALT = "mk_secure_salt_2026_x89a";
 	const DEFAULT_USER = "admin";
-	// Correct Precomputed SHA-256 for default password: "admin@mk2026" with salt "mk_secure_salt_2026_x89a"
+	// Precomputed SHA-256 for default admin authentication
 	const DEFAULT_PASS_HASH = "538bbe790322de04daeb27be22b1eec8c991af5ae6fa4e18818d44d38e6372a4"; 
 
 	async function hashPassword(password, salt = DEFAULT_SALT) {
@@ -764,10 +764,9 @@
 		const auth = getStoredAuth();
 		const inputHash = await hashPassword(passVal, auth.salt);
 
-		const isDefaultMatch = (userVal === DEFAULT_USER && passVal === 'admin@mk2026');
 		const isHashMatch = (userVal === auth.username && inputHash === auth.passHash);
 
-		if (isDefaultMatch || isHashMatch) {
+		if (isHashMatch) {
 			// Successful login - clear rate limits
 			localStorage.removeItem('mk_login_fail_count');
 			localStorage.removeItem('mk_login_lock_time');
@@ -829,8 +828,9 @@
 			statusMsg.className = 'terminal-status processing';
 		}
 		
-		setTimeout(() => {
-			if (keyVal === 'mohan-core-2026') {
+		setTimeout(async () => {
+			const inputHash = await hashPassword(keyVal, DEFAULT_SALT);
+			if (inputHash === '9505cf440378379564ed058c52c7b9ab7307f382478e6d03b715780807fcfd5d') {
 				if (statusMsg) {
 					statusMsg.textContent = '> ACCESS GRANTED. DECRYPTING...';
 					statusMsg.className = 'terminal-status success';
