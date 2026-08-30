@@ -4,14 +4,13 @@
  * ============================================================
  */
 
-const CACHE_NAME = 'godzemohan-v2.5';
+const CACHE_NAME = 'godzemohan-v2.6';
 const ASSETS_TO_CACHE = [
 	'/',
 	'/index.html',
 	'/style.css',
 	'/app.js',
 	'/chat.js',
-	'/cli.js',
 	'/manifest.json',
 	'/favicon.ico',
 	'/logo_transparent.png',

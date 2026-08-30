@@ -174,10 +174,45 @@
 			.replace(/\n/g, "<br>");
 	}
 
-	// ─── VOICE AI: SPEECH-TO-TEXT & SPEECH SYNTHESIS ──────────────
+	// ─── VOICE AI: GEMINI "VEGA" SYNTHESIS & SPEECH RECOGNITION ───
 	let isVoiceAutoPlay = false;
 	let activeRecognition = null;
 	let isListening = false;
+	let cachedVegaVoice = null;
+
+	function findVegaVoice() {
+		if (!('speechSynthesis' in window)) return null;
+		const voices = window.speechSynthesis.getVoices();
+		if (!voices || voices.length === 0) return null;
+
+		// 1. Prioritize Google / Gemini-like warm natural female voices (Vega profile)
+		const vegaPriority = [
+			// Google Neural / Chrome voices
+			v => v.name.includes("Google") && (v.name.includes("US English") || v.name.includes("UK English Female") || v.lang === "en-US"),
+			v => v.name.toLowerCase().includes("natural") && v.name.toLowerCase().includes("jenny"),
+			v => v.name.toLowerCase().includes("aria") && v.name.toLowerCase().includes("natural"),
+			v => v.name.toLowerCase().includes("samantha") && v.name.toLowerCase().includes("enhanced"),
+			v => v.name === "Samantha",
+			v => v.name === "Victoria",
+			v => v.name === "Karen",
+			v => v.name.toLowerCase().includes("zira"),
+			// Generic English Female / Natural
+			v => v.lang.startsWith("en-US") && !v.name.toLowerCase().includes("male"),
+			v => v.lang.startsWith("en")
+		];
+
+		for (const matcher of vegaPriority) {
+			const match = voices.find(matcher);
+			if (match) return match;
+		}
+		return voices[0] || null;
+	}
+
+	if ('speechSynthesis' in window) {
+		window.speechSynthesis.onvoiceschanged = () => {
+			cachedVegaVoice = findVegaVoice();
+		};
+	}
 
 	function cleanTextForSpeech(text) {
 		if (!text) return "";
@@ -185,8 +220,9 @@
 			.replace(/\[ACTION:[^\]]+\][^\n]*/gi, "")
 			.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
 			.replace(/https?:\/\/\S+/gi, "")
-			.replace(/[*_`#~>]/g, "")
+			.replace(/[*_`#~>•]/g, "")
 			.replace(/<[^>]+>/g, "")
+			.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "") // strip emojis
 			.trim();
 	}
 
@@ -200,16 +236,29 @@
 		const clean = cleanTextForSpeech(text);
 		if (!clean) return;
 
-		const utterance = new SpeechSynthesisUtterance(clean);
-		utterance.rate = 1.05;
-		utterance.pitch = 1.0;
+		if (!cachedVegaVoice) {
+			cachedVegaVoice = findVegaVoice();
+		}
 
-		const voices = window.speechSynthesis.getVoices();
-		// Prefer English natural/assistant voices
-		const preferred = voices.find(v => (v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel')))) || voices.find(v => v.lang.startsWith('en'));
-		if (preferred) utterance.voice = preferred;
+		// Split into natural conversational sentence chunks for fluid pacing (Gemini Vega style)
+		const sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
+		
+		sentences.forEach((sentence, idx) => {
+			const sentenceText = sentence.trim();
+			if (!sentenceText) return;
 
-		window.speechSynthesis.speak(utterance);
+			const utterance = new SpeechSynthesisUtterance(sentenceText);
+			// Gemini Vega Voice Tuning: Bright clarity, warm articulation, natural conversational cadence
+			utterance.pitch = 1.06;
+			utterance.rate = 1.02;
+			utterance.volume = 1.0;
+
+			if (cachedVegaVoice) {
+				utterance.voice = cachedVegaVoice;
+			}
+
+			window.speechSynthesis.speak(utterance);
+		});
 	};
 
 	window.toggleVoiceAutoPlay = function (btnId = 'tab-chat-tts-btn') {
@@ -218,11 +267,11 @@
 		if (btn) {
 			if (isVoiceAutoPlay) {
 				btn.classList.add('active');
-				btn.setAttribute('title', 'AI Voice Output: ON (Click to turn OFF)');
-				window.speakChatMessage("Voice output activated. I will read responses aloud.");
+				btn.setAttribute('title', 'AI Voice (Vega): ON (Click to turn OFF)');
+				window.speakChatMessage("Gemini Vega voice activated. I am ready to speak with you.");
 			} else {
 				btn.classList.remove('active');
-				btn.setAttribute('title', 'AI Voice Output: OFF (Click to turn ON)');
+				btn.setAttribute('title', 'AI Voice (Vega): OFF (Click to turn ON)');
 				window.speechSynthesis.cancel();
 			}
 		}

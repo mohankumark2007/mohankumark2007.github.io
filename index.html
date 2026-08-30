@@ -52,9 +52,6 @@
 	<!-- Google Gemini AI Assistant Engine -->
 	<script src="chat.js" defer></script>
 	
-	<!-- Interactive Cyber Terminal CLI -->
-	<script src="cli.js" defer></script>
-	
 
 </head>
 
@@ -124,10 +121,6 @@
 			<button id="pwa-install-btn" class="header-install-btn" style="display: none;" title="Install App on your device">
 				<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
 				<span>Install</span>
-			</button>
-			<button class="header-cli-btn" onclick="window.toggleCyberCLI()" title="Open Cyber Terminal [~]" aria-label="Open Cyber Terminal">
-				<span class="cli-icon-prompt">&gt;_</span>
-				<span>CLI</span>
 			</button>
 			<div class="live-clock" id="live-clock" title="Current Time">
 				<span class="live-clock-dot"></span>
@@ -934,33 +927,8 @@
 			<div class="telemetry-item hud-status">
 				<span class="hud-dot pulse"></span> DEFENSE GRID: <strong>ARMED</strong>
 			</div>
-			<button class="telemetry-cli-btn" onclick="window.toggleCyberCLI()" title="Launch Web CLI Terminal">
-				<span>&gt;_ CLI</span>
-			</button>
 		</div>
 	</aside>
-
-	<!-- Cyber Terminal Modal Engine -->
-	<div id="cyber-cli-modal" class="cyber-cli-overlay" style="display: none;" role="dialog" aria-label="Cyber Terminal">
-		<div class="cyber-cli-window">
-			<div class="cyber-cli-header">
-				<div class="cyber-cli-title">
-					<span class="cli-header-dot red" onclick="window.closeCyberCLI()" title="Close Terminal"></span>
-					<span class="cli-header-dot yellow" title="Minimize"></span>
-					<span class="cli-header-dot green" title="Maximize"></span>
-					<span class="cli-header-label">godzemohan@core-terminal: ~ (bash 5.2)</span>
-				</div>
-				<button class="cyber-cli-close" onclick="window.closeCyberCLI()" aria-label="Close">&times;</button>
-			</div>
-			<div id="cyber-cli-body" class="cyber-cli-body">
-				<div id="cli-output" class="cli-output-area"></div>
-				<div class="cli-input-row">
-					<span class="cli-prompt-user">guest@godzemohan.in</span>:<span class="cli-prompt-path">~</span>$ 
-					<input type="text" id="cli-input" class="cli-input-field" autocomplete="off" spellcheck="false" autofocus>
-				</div>
-			</div>
-		</div>
-	</div>
 
 	<!-- Footer -->
 	<footer class="site-footer">
