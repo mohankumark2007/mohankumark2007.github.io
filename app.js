@@ -353,44 +353,73 @@
 					submitBtn.disabled = true;
 					submitBtn.textContent = 'Sending...';
 				}
+				if (statusMsg) {
+					statusMsg.textContent = '';
+					statusMsg.style.display = 'none';
+				}
 
-				fetch('https://formspree.io/f/xbgrnqvj', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Accept': 'application/json'
-					},
-					body: JSON.stringify({
-						name: nameInput?.value.trim() || 'Anonymous Visitor',
-						email: emailInput?.value.trim() || 'Not provided',
-						message: messageInput.value.trim(),
-						_subject: 'Website Feedback - Mohan Creative Space'
-					})
-				})
-					.then(res => {
-						if (res.ok) return res.json();
-						throw new Error('Submission failed');
-					})
-					.then(() => {
-						window.showToast('Thank you! Your feedback was sent. 🙏', 'heart');
-						if (messageInput) messageInput.value = '';
-						if (nameInput) nameInput.value = '';
-						if (emailInput) emailInput.value = '';
-						window.toggleFeedback();
-					})
-					.catch(() => {
-						if (statusMsg) {
-							statusMsg.textContent = 'Unable to send feedback. Please try again.';
-							statusMsg.className = 'feedback-status-msg error';
-							statusMsg.style.display = 'block';
-						}
-					})
-					.finally(() => {
-						if (submitBtn) {
-							submitBtn.disabled = false;
-							submitBtn.textContent = 'Send Feedback';
-						}
-					});
+				const feedbackData = {
+					name: nameInput?.value.trim() || 'Anonymous Visitor',
+					message: messageInput.value.trim(),
+					_subject: 'Website Feedback - godzemohan.in',
+					_captcha: 'false',
+					_template: 'table'
+				};
+				if (emailInput && emailInput.value.trim()) {
+					feedbackData.email = emailInput.value.trim();
+					feedbackData._replyto = emailInput.value.trim();
+				}
+
+				// Use FormSubmit.co direct form POST via hidden iframe for guaranteed delivery
+				const iframeName = 'feedback-iframe-' + Date.now();
+				let iframe = document.createElement('iframe');
+				iframe.name = iframeName;
+				iframe.style.display = 'none';
+				document.body.appendChild(iframe);
+
+				const tempForm = document.createElement('form');
+				tempForm.method = 'POST';
+				tempForm.action = 'https://formsubmit.co/mohan7gen@gmail.com';
+				tempForm.target = iframeName;
+				tempForm.style.display = 'none';
+
+				// Add all fields as hidden inputs
+				for (const [key, value] of Object.entries(feedbackData)) {
+					const input = document.createElement('input');
+					input.type = 'hidden';
+					input.name = key;
+					input.value = value;
+					tempForm.appendChild(input);
+				}
+
+				// Add _next to redirect inside iframe (prevents page navigation)
+				const nextInput = document.createElement('input');
+				nextInput.type = 'hidden';
+				nextInput.name = '_next';
+				nextInput.value = window.location.href;
+				tempForm.appendChild(nextInput);
+
+				document.body.appendChild(tempForm);
+				tempForm.submit();
+
+				// Show success after short delay (form POST is fire-and-forget)
+				setTimeout(() => {
+					window.showToast('Thank you! Your feedback was sent. 🙏', 'heart');
+					if (messageInput) messageInput.value = '';
+					if (nameInput) nameInput.value = '';
+					if (emailInput) emailInput.value = '';
+					if (submitBtn) {
+						submitBtn.disabled = false;
+						submitBtn.textContent = 'Send Feedback';
+					}
+					window.toggleFeedback();
+
+					// Cleanup iframe and temp form after a delay
+					setTimeout(() => {
+						if (iframe && iframe.parentNode) iframe.parentNode.removeChild(iframe);
+						if (tempForm && tempForm.parentNode) tempForm.parentNode.removeChild(tempForm);
+					}, 5000);
+				}, 1500);
 			});
 		}
 	}
@@ -909,7 +938,7 @@
 
 		const chapterObj = {
 			id: chId,
-			season: seasonInput?.value.trim() || 'Season 01',
+			season: 'Season 01',
 			tag: tagInput?.value.trim() || 'Chapter',
 			title: headline,
 			description: descInput?.value.trim() || '',
