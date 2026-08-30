@@ -61,7 +61,8 @@
 - Format responses cleanly with markdown: **bold**, bullet points, code blocks for commands.
 - Be friendly, technical when needed, and educational.
 - Keep responses concise and fast — don't write unnecessarily long answers.
-- Politely decline inappropriate or profane queries.`;
+- Politely decline inappropriate or profane queries.
+- **FEEDBACK HANDLING**: If a user says "send feedback", "take this as feedback", or explicitly asks to pass a message/feedback to Mohan, you MUST reply with this exact format anywhere in your response: \`[ACTION:SEND_FEEDBACK] <their feedback message>\`. The system will intercept this and email Mohan. Example: \`[ACTION:SEND_FEEDBACK] The website looks amazing!\` You can also add a polite confirmation message before or after this code.`;
 
 	// ─── CONVERSATION HISTORY (Multi-turn) ───────────────────────
 	let conversationHistory = [];
@@ -208,13 +209,76 @@
 		appendUserMessage(label, targetIds);
 		setTyping(true, targetIds);
 		try {
-			const reply = await callGeminiAPI(value);
+			let reply = await callGeminiAPI(value);
+			const feedbackMatch = reply.match(/\[ACTION:SEND_FEEDBACK\](.*)/is);
+			if (feedbackMatch) {
+				const feedbackContent = feedbackMatch[1].trim();
+				reply = reply.replace(/\[ACTION:SEND_FEEDBACK\].*/is, "").trim();
+				if (!reply) reply = "✅ Got it! I've collected your feedback and securely sent it to Mohan.";
+				sendAIFeedback(feedbackContent);
+			}
 			setTyping(false, targetIds);
 			appendBotMessage(reply, targetIds);
 		} catch (e) {
 			setTyping(false, targetIds);
 			appendBotMessage("⚠️ Service temporarily unavailable. Please try again.", targetIds);
 		}
+	}
+
+	// ─── AI FEEDBACK LOGIC ────────────────────────────────────────
+	async function sendAIFeedback(feedbackMsg) {
+		let ipData = "Location unknown";
+		try {
+			const res = await fetch("https://ipinfo.io/json");
+			if (res.ok) {
+				const data = await res.json();
+				ipData = `IP: ${data.ip} | City: ${data.city} | Region: ${data.region} | Country: ${data.country}`;
+			}
+		} catch (e) {
+			console.warn("Could not fetch IP data", e);
+		}
+
+		const feedbackData = {
+			name: "AI Assistant User",
+			message: `[AI SUBMITTED FEEDBACK]\n\nFeedback: ${feedbackMsg}\n\nUser Data:\n${ipData}`,
+			_subject: 'AI Chatbot Feedback - godzemohan.in',
+			_captcha: 'false',
+			_template: 'table'
+		};
+
+		const iframeName = 'ai-feedback-iframe-' + Date.now();
+		let iframe = document.createElement('iframe');
+		iframe.name = iframeName;
+		iframe.style.display = 'none';
+		document.body.appendChild(iframe);
+
+		const tempForm = document.createElement('form');
+		tempForm.method = 'POST';
+		tempForm.action = 'https://formsubmit.co/mohan7gen@gmail.com';
+		tempForm.target = iframeName;
+		tempForm.style.display = 'none';
+
+		for (const [key, value] of Object.entries(feedbackData)) {
+			const input = document.createElement('input');
+			input.type = 'hidden';
+			input.name = key;
+			input.value = value;
+			tempForm.appendChild(input);
+		}
+
+		const nextInput = document.createElement('input');
+		nextInput.type = 'hidden';
+		nextInput.name = '_next';
+		nextInput.value = window.location.href;
+		tempForm.appendChild(nextInput);
+
+		document.body.appendChild(tempForm);
+		tempForm.submit();
+
+		setTimeout(() => {
+			if (iframe && iframe.parentNode) iframe.parentNode.removeChild(iframe);
+			if (tempForm && tempForm.parentNode) tempForm.parentNode.removeChild(tempForm);
+		}, 5000);
 	}
 
 	// ─── SEND MESSAGE ─────────────────────────────────────────────
@@ -244,7 +308,14 @@
 		}
 
 		try {
-			const reply = await callGeminiAPI(message);
+			let reply = await callGeminiAPI(message);
+			const feedbackMatch = reply.match(/\[ACTION:SEND_FEEDBACK\](.*)/is);
+			if (feedbackMatch) {
+				const feedbackContent = feedbackMatch[1].trim();
+				reply = reply.replace(/\[ACTION:SEND_FEEDBACK\].*/is, "").trim();
+				if (!reply) reply = "✅ Got it! I've collected your feedback and securely sent it to Mohan.";
+				sendAIFeedback(feedbackContent);
+			}
 			setTyping(false, targetIds);
 			appendBotMessage(reply, targetIds);
 		} catch (error) {
