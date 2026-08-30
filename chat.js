@@ -72,7 +72,10 @@
 - Be friendly, technical when needed, and educational.
 - Keep responses concise and fast — don't write unnecessarily long answers.
 - Politely decline inappropriate or profane queries.
-- **FEEDBACK HANDLING**: If a user says "send feedback", "take this as feedback", or explicitly asks to pass a message/feedback to Mohan, you MUST reply with this exact format anywhere in your response: \`[ACTION:SEND_FEEDBACK] <their feedback message>\`. The system will intercept this and email Mohan. Example: \`[ACTION:SEND_FEEDBACK] The website looks amazing!\` You can also add a polite confirmation message before or after this code.`;
+- **FEEDBACK HANDLING**: If a user says "send feedback", "take this as feedback", or explicitly asks to pass a message/feedback to Mohan, you MUST reply with this exact format anywhere in your response: \`[ACTION:SEND_FEEDBACK] <their feedback message>\`. The system will intercept this and email Mohan. Example: \`[ACTION:SEND_FEEDBACK] The website looks amazing!\`
+- **SECURITY INCIDENT & VULNERABILITY ALERT PROTOCOL**: If a user reports a security vulnerability, bug, exploit, unauthorized access, attack vector, suspicious activity, or security-related feedback:
+  1. Immediately activate defense mode and respond with: \`🚨 **[SECURITY ALERT PROTOCOL ENGAGED]**\` followed by a concise security advisory and confirmation.
+  2. You MUST include this exact code anywhere in your response: \`[ACTION:SEND_SECURITY_ALERT] <detailed security issue, vulnerability analysis, and recommended mitigation>\`. The system will intercept this and immediately transmit an urgent high-priority security alert to Mohan's email.`;
 
 	// ─── CONVERSATION HISTORY (Multi-turn) ───────────────────────
 	let conversationHistory = [];
@@ -220,13 +223,7 @@
 		setTyping(true, targetIds);
 		try {
 			let reply = await callGeminiAPI(value);
-			const feedbackMatch = reply.match(/\[ACTION:SEND_FEEDBACK\](.*)/is);
-			if (feedbackMatch) {
-				const feedbackContent = feedbackMatch[1].trim();
-				reply = reply.replace(/\[ACTION:SEND_FEEDBACK\].*/is, "").trim();
-				if (!reply) reply = "✅ Got it! I've collected your feedback and securely sent it to Mohan.";
-				sendAIFeedback(feedbackContent);
-			}
+			reply = processAIReplyActions(reply);
 			setTyping(false, targetIds);
 			appendBotMessage(reply, targetIds);
 		} catch (e) {
@@ -235,23 +232,53 @@
 		}
 	}
 
-	// ─── AI FEEDBACK LOGIC ────────────────────────────────────────
-	async function sendAIFeedback(feedbackMsg) {
+	// ─── AI ACTION & SECURITY INTERCEPTOR ─────────────────────────
+	function processAIReplyActions(rawReply) {
+		if (!rawReply) return rawReply;
+		let cleanReply = rawReply;
+
+		const secAlertMatch = cleanReply.match(/\[ACTION:SEND_SECURITY_ALERT\](.*)/is);
+		if (secAlertMatch) {
+			const alertContent = secAlertMatch[1].trim();
+			cleanReply = cleanReply.replace(/\[ACTION:SEND_SECURITY_ALERT\].*/is, "").trim();
+			if (!cleanReply) cleanReply = "🚨 **[SECURITY ALERT TRANSMITTED]** High-priority security advisory and threat telemetry dispatched directly to Mohan.";
+			sendAIFeedback(alertContent, true);
+		}
+
+		const feedbackMatch = cleanReply.match(/\[ACTION:SEND_FEEDBACK\](.*)/is);
+		if (feedbackMatch) {
+			const feedbackContent = feedbackMatch[1].trim();
+			cleanReply = cleanReply.replace(/\[ACTION:SEND_FEEDBACK\].*/is, "").trim();
+			if (!cleanReply) cleanReply = "✅ Got it! I've collected your feedback and securely sent it to Mohan.";
+			sendAIFeedback(feedbackContent, false);
+		}
+
+		return cleanReply;
+	}
+
+	// ─── AI FEEDBACK & SECURITY DISPATCH LOGIC ────────────────────
+	async function sendAIFeedback(feedbackMsg, isSecurityAlert = false) {
 		let ipData = "Location unknown";
 		try {
 			const res = await fetch("https://ipinfo.io/json");
 			if (res.ok) {
 				const data = await res.json();
-				ipData = `IP: ${data.ip} | City: ${data.city} | Region: ${data.region} | Country: ${data.country}`;
+				ipData = `IP: ${data.ip} | City: ${data.city} | Region: ${data.region} | Country: ${data.country} | ISP: ${data.org || 'N/A'}`;
 			}
 		} catch (e) {
 			console.warn("Could not fetch IP data", e);
 		}
 
+		const formattedBody = isSecurityAlert
+			? `🚨 [CRITICAL AI SECURITY INCIDENT REPORT]\n\nThreat / Vulnerability Analysis:\n${feedbackMsg}\n\nClient Security Metadata:\n${ipData}\nUser Agent: ${navigator.userAgent}\nTimestamp: ${new Date().toISOString()}`
+			: `[AI SUBMITTED FEEDBACK]\n\nFeedback: ${feedbackMsg}\n\nUser Data:\n${ipData}`;
+
 		const feedbackData = {
-			name: "AI Assistant User",
-			message: `[AI SUBMITTED FEEDBACK]\n\nFeedback: ${feedbackMsg}\n\nUser Data:\n${ipData}`,
-			_subject: 'AI Chatbot Feedback - godzemohan.in',
+			name: isSecurityAlert ? "AI Security Sentinel" : "AI Assistant User",
+			message: formattedBody,
+			_subject: isSecurityAlert
+				? '🚨 [CRITICAL SECURITY ALERT] AI-Detected Threat Report - godzemohan.in'
+				: 'AI Chatbot Feedback - godzemohan.in',
 			_captcha: 'false',
 			_template: 'table'
 		};
@@ -319,13 +346,7 @@
 
 		try {
 			let reply = await callGeminiAPI(message);
-			const feedbackMatch = reply.match(/\[ACTION:SEND_FEEDBACK\](.*)/is);
-			if (feedbackMatch) {
-				const feedbackContent = feedbackMatch[1].trim();
-				reply = reply.replace(/\[ACTION:SEND_FEEDBACK\].*/is, "").trim();
-				if (!reply) reply = "✅ Got it! I've collected your feedback and securely sent it to Mohan.";
-				sendAIFeedback(feedbackContent);
-			}
+			reply = processAIReplyActions(reply);
 			setTyping(false, targetIds);
 			appendBotMessage(reply, targetIds);
 		} catch (error) {

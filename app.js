@@ -336,9 +336,40 @@
 			trigger.addEventListener('click', window.toggleFeedback);
 		}
 
+		const fileInput = document.getElementById('feedback-attachment');
+		const fileLabel = document.getElementById('feedback-file-label');
+		const fileText = document.getElementById('feedback-file-text');
+		const clearFileBtn = document.getElementById('feedback-clear-file');
+
+		if (fileInput && fileLabel && fileText && clearFileBtn) {
+			fileInput.addEventListener('change', function () {
+				if (fileInput.files && fileInput.files[0]) {
+					const file = fileInput.files[0];
+					const fileName = file.name;
+					const fileSizeKB = (file.size / 1024).toFixed(1);
+					fileText.textContent = `📎 ${fileName} (${fileSizeKB} KB)`;
+					fileLabel.classList.add('has-file');
+					clearFileBtn.style.display = 'flex';
+				} else {
+					fileText.textContent = 'Attach Screenshot / File (Optional)';
+					fileLabel.classList.remove('has-file');
+					clearFileBtn.style.display = 'none';
+				}
+			});
+
+			clearFileBtn.addEventListener('click', function (e) {
+				e.preventDefault();
+				e.stopPropagation();
+				fileInput.value = '';
+				fileText.textContent = 'Attach Screenshot / File (Optional)';
+				fileLabel.classList.remove('has-file');
+				clearFileBtn.style.display = 'none';
+			});
+		}
+
 		const form = document.getElementById('feedback-form');
 		if (form) {
-			form.addEventListener('submit', function (e) {
+			form.addEventListener('submit', async function (e) {
 				e.preventDefault();
 
 				const submitBtn = form.querySelector('.feedback-submit-btn');
@@ -351,17 +382,40 @@
 
 				if (submitBtn) {
 					submitBtn.disabled = true;
-					submitBtn.textContent = 'Sending...';
+					submitBtn.textContent = 'Analyzing & Sending...';
 				}
 				if (statusMsg) {
 					statusMsg.textContent = '';
 					statusMsg.style.display = 'none';
 				}
 
+				// Check for security-related feedback or vulnerability disclosure
+				const userMsg = messageInput.value.trim();
+				const secRegex = /\b(security|vulnerability|exploit|cve|xss|sql\s*injection|csrf|rce|zero-day|0day|backdoor|malware|breach|leak|auth\s*bypass|bypass|threat|ddos|hacked|penetration|bug\s*bounty|attack|payload|deface|compromised)\b/i;
+				const isSecurityAlert = secRegex.test(userMsg);
+
+				// Fetch location & IP for attribution & security log
+				let ipData = "Location lookup pending/offline";
+				try {
+					const res = await fetch("https://ipinfo.io/json");
+					if (res.ok) {
+						const data = await res.json();
+						ipData = `IP: ${data.ip} | City: ${data.city} | Region: ${data.region} | Country: ${data.country} | ISP: ${data.org || 'N/A'}`;
+					}
+				} catch (err) {
+					console.warn("Could not fetch IP for feedback", err);
+				}
+
+				const formattedMessage = isSecurityAlert
+					? `🚨 [CRITICAL SECURITY ALERT / VULNERABILITY REPORT]\n\nReported Message:\n${userMsg}\n\nSecurity Audit Details:\n${ipData}\nUser Agent: ${navigator.userAgent}\nTimestamp: ${new Date().toISOString()}`
+					: `${userMsg}\n\nUser Metadata:\n${ipData}`;
+
 				const feedbackData = {
 					name: nameInput?.value.trim() || 'Anonymous Visitor',
-					message: messageInput.value.trim(),
-					_subject: 'Website Feedback - godzemohan.in',
+					message: formattedMessage,
+					_subject: isSecurityAlert
+						? '🚨 [CRITICAL SECURITY ALERT] Security Issue Reported - godzemohan.in'
+						: 'Website Feedback - godzemohan.in',
 					_captcha: 'false',
 					_template: 'table'
 				};
@@ -370,7 +424,7 @@
 					feedbackData._replyto = emailInput.value.trim();
 				}
 
-				// Use FormSubmit.co direct form POST via hidden iframe for guaranteed delivery
+				// Hidden iframe for seamless submission
 				const iframeName = 'feedback-iframe-' + Date.now();
 				let iframe = document.createElement('iframe');
 				iframe.name = iframeName;
@@ -381,6 +435,7 @@
 				tempForm.method = 'POST';
 				tempForm.action = 'https://formsubmit.co/mohan7gen@gmail.com';
 				tempForm.target = iframeName;
+				tempForm.enctype = 'multipart/form-data';
 				tempForm.style.display = 'none';
 
 				// Add all fields as hidden inputs
@@ -392,7 +447,14 @@
 					tempForm.appendChild(input);
 				}
 
-				// Add _next to redirect inside iframe (prevents page navigation)
+				// If an attachment file is selected, attach it
+				if (fileInput && fileInput.files && fileInput.files[0]) {
+					const clonedFileInput = fileInput.cloneNode(true);
+					// Copy over files via DataTransfer or append the actual input temporarily
+					tempForm.appendChild(fileInput);
+				}
+
+				// Add _next to redirect inside iframe
 				const nextInput = document.createElement('input');
 				nextInput.type = 'hidden';
 				nextInput.name = '_next';
@@ -402,12 +464,32 @@
 				document.body.appendChild(tempForm);
 				tempForm.submit();
 
-				// Show success after short delay (form POST is fire-and-forget)
+				// Re-insert file input placeholder in the original form if moved
+				if (fileLabel && !document.getElementById('feedback-attachment')) {
+					const newFileInput = document.createElement('input');
+					newFileInput.type = 'file';
+					newFileInput.id = 'feedback-attachment';
+					newFileInput.name = 'attachment';
+					newFileInput.accept = 'image/*,.pdf,.doc,.docx,.txt,.log,.pcap,.json,.zip';
+					newFileInput.style.display = 'none';
+					fileLabel.parentNode.insertBefore(newFileInput, clearFileBtn);
+				}
+
+				// Show contextual success toast
 				setTimeout(() => {
-					window.showToast('Thank you! Your feedback was sent. 🙏', 'heart');
+					if (isSecurityAlert) {
+						window.showToast('🚨 Security Alert: High-priority vulnerability report received and sent to Mohan!', 'alert');
+					} else {
+						window.showToast('Thank you! Your feedback was sent. 🙏', 'heart');
+					}
+
 					if (messageInput) messageInput.value = '';
 					if (nameInput) nameInput.value = '';
 					if (emailInput) emailInput.value = '';
+					if (fileText) fileText.textContent = 'Attach Screenshot / File (Optional)';
+					if (fileLabel) fileLabel.classList.remove('has-file');
+					if (clearFileBtn) clearFileBtn.style.display = 'none';
+
 					if (submitBtn) {
 						submitBtn.disabled = false;
 						submitBtn.textContent = 'Send Feedback';
