@@ -174,6 +174,123 @@
 			.replace(/\n/g, "<br>");
 	}
 
+	// ─── VOICE AI: SPEECH-TO-TEXT & SPEECH SYNTHESIS ──────────────
+	let isVoiceAutoPlay = false;
+	let activeRecognition = null;
+	let isListening = false;
+
+	function cleanTextForSpeech(text) {
+		if (!text) return "";
+		return text
+			.replace(/\[ACTION:[^\]]+\][^\n]*/gi, "")
+			.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
+			.replace(/https?:\/\/\S+/gi, "")
+			.replace(/[*_`#~>]/g, "")
+			.replace(/<[^>]+>/g, "")
+			.trim();
+	}
+
+	window.speakChatMessage = function (text) {
+		if (!('speechSynthesis' in window)) {
+			console.warn("Speech Synthesis not supported in this browser.");
+			return;
+		}
+		window.speechSynthesis.cancel(); // Stop ongoing speech
+
+		const clean = cleanTextForSpeech(text);
+		if (!clean) return;
+
+		const utterance = new SpeechSynthesisUtterance(clean);
+		utterance.rate = 1.05;
+		utterance.pitch = 1.0;
+
+		const voices = window.speechSynthesis.getVoices();
+		// Prefer English natural/assistant voices
+		const preferred = voices.find(v => (v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel')))) || voices.find(v => v.lang.startsWith('en'));
+		if (preferred) utterance.voice = preferred;
+
+		window.speechSynthesis.speak(utterance);
+	};
+
+	window.toggleVoiceAutoPlay = function (btnId = 'tab-chat-tts-btn') {
+		isVoiceAutoPlay = !isVoiceAutoPlay;
+		const btn = document.getElementById(btnId);
+		if (btn) {
+			if (isVoiceAutoPlay) {
+				btn.classList.add('active');
+				btn.setAttribute('title', 'AI Voice Output: ON (Click to turn OFF)');
+				window.speakChatMessage("Voice output activated. I will read responses aloud.");
+			} else {
+				btn.classList.remove('active');
+				btn.setAttribute('title', 'AI Voice Output: OFF (Click to turn ON)');
+				window.speechSynthesis.cancel();
+			}
+		}
+	};
+
+	window.toggleVoiceRecognition = function (inputId = 'tab-chat-input', micBtnId = 'tab-chat-voice-btn') {
+		const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+		if (!SpeechRecognition) {
+			alert("Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.");
+			return;
+		}
+
+		const micBtn = document.getElementById(micBtnId);
+		const inputEl = document.getElementById(inputId);
+
+		if (isListening && activeRecognition) {
+			activeRecognition.stop();
+			isListening = false;
+			if (micBtn) micBtn.classList.remove('listening');
+			return;
+		}
+
+		try {
+			const recognition = new SpeechRecognition();
+			recognition.lang = 'en-US';
+			recognition.interimResults = false;
+			recognition.maxAlternatives = 1;
+
+			recognition.onstart = function () {
+				isListening = true;
+				if (micBtn) {
+					micBtn.classList.add('listening');
+					micBtn.setAttribute('title', 'Listening... Click to stop');
+				}
+			};
+
+			recognition.onresult = function (event) {
+				const transcript = event.results[0][0].transcript;
+				if (inputEl) {
+					inputEl.value = (inputEl.value ? inputEl.value + ' ' : '') + transcript;
+					autoResizeTextarea(inputEl);
+					inputEl.focus();
+				}
+			};
+
+			recognition.onerror = function (event) {
+				console.warn("Speech recognition error:", event.error);
+				isListening = false;
+				if (micBtn) micBtn.classList.remove('listening');
+			};
+
+			recognition.onend = function () {
+				isListening = false;
+				if (micBtn) {
+					micBtn.classList.remove('listening');
+					micBtn.setAttribute('title', 'Voice Input (Speech-to-Text)');
+				}
+			};
+
+			activeRecognition = recognition;
+			recognition.start();
+		} catch (err) {
+			console.error("Failed to start voice recognition:", err);
+			isListening = false;
+			if (micBtn) micBtn.classList.remove('listening');
+		}
+	};
+
 	function appendMessage(text, sender, targetIds) {
 		const msgsId = targetIds ? targetIds.msgs : "tab-chat-messages";
 		const messagesArea = document.getElementById(msgsId);
@@ -181,9 +298,27 @@
 
 		const msgDiv = document.createElement("div");
 		msgDiv.className = `chat-message ${sender}`;
-		msgDiv.innerHTML = renderMarkdown(text);
+		
+		let contentHtml = renderMarkdown(text);
+		if (sender === 'bot') {
+			// Add speaker replay button
+			const textForAttr = encodeURIComponent(text);
+			contentHtml += `
+				<div class="msg-meta-actions">
+					<button class="msg-speak-btn" onclick="window.speakChatMessage(decodeURIComponent('${textForAttr}'))" title="Read message aloud">
+						<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+					</button>
+				</div>
+			`;
+		}
+
+		msgDiv.innerHTML = contentHtml;
 		messagesArea.appendChild(msgDiv);
 		messagesArea.scrollTop = messagesArea.scrollHeight;
+
+		if (sender === 'bot' && isVoiceAutoPlay) {
+			window.speakChatMessage(text);
+		}
 	}
 
 	function appendBotMessage(text, targetIds) { appendMessage(text, "bot", targetIds); }

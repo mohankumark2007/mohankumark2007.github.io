@@ -52,6 +52,9 @@
 	<!-- Google Gemini AI Assistant Engine -->
 	<script src="chat.js" defer></script>
 	
+	<!-- Interactive Cyber Terminal CLI -->
+	<script src="cli.js" defer></script>
+	
 
 </head>
 
@@ -118,6 +121,14 @@
 			<a href="#ai" id="tab-ai" class="tab-link" data-tab="ai" role="tab" aria-selected="false">AI Assistant</a>
 		</nav>
 		<div class="header-actions">
+			<button id="pwa-install-btn" class="header-install-btn" style="display: none;" title="Install App on your device">
+				<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+				<span>Install</span>
+			</button>
+			<button class="header-cli-btn" onclick="window.toggleCyberCLI()" title="Open Cyber Terminal [~]" aria-label="Open Cyber Terminal">
+				<span class="cli-icon-prompt">&gt;_</span>
+				<span>CLI</span>
+			</button>
 			<div class="live-clock" id="live-clock" title="Current Time">
 				<span class="live-clock-dot"></span>
 				<span class="live-clock-time">--:--:-- --</span>
@@ -492,10 +503,18 @@
 
 					<!-- Input Footer -->
 					<div class="chat-footer">
-						<textarea id="tab-chat-input" placeholder="Ask about Mohan's projects, free files, or filmmaking tips..." rows="1"></textarea>
-						<button id="tab-chat-send-btn" aria-label="Send message">
-							<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-						</button>
+						<textarea id="tab-chat-input" placeholder="Ask about Mohan's projects, free files, or cybersecurity tips..." rows="1"></textarea>
+						<div class="chat-footer-controls">
+							<button type="button" id="tab-chat-voice-btn" class="chat-tool-btn" title="Voice Input (Speech-to-Text)" onclick="window.toggleVoiceRecognition('tab-chat-input', 'tab-chat-voice-btn')">
+								<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+							</button>
+							<button type="button" id="tab-chat-tts-btn" class="chat-tool-btn" title="Toggle AI Voice Speech Output" onclick="window.toggleVoiceAutoPlay('tab-chat-tts-btn')">
+								<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+							</button>
+							<button id="tab-chat-send-btn" aria-label="Send message" title="Send">
+								<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+							</button>
+						</div>
 					</div>
 				</div>
 			</section>
@@ -900,12 +919,55 @@
 	<!-- Toast Notification Container -->
 	<div id="toast-container" class="toast-container" aria-live="polite"></div>
 
+	<!-- Live Cyber Telemetry HUD (Visitor Security Node) -->
+	<aside id="telemetry-hud" class="telemetry-hud" aria-label="Live Security Telemetry">
+		<div class="telemetry-inner">
+			<div class="telemetry-item" id="hud-node">
+				<span class="hud-dot active"></span> NODE: <strong>Scanning Gateway...</strong>
+			</div>
+			<div class="telemetry-item" id="hud-cipher">
+				<span class="hud-tag">ENCRYPTION:</span> TLS 1.3 / AES-256-GCM
+			</div>
+			<div class="telemetry-item" id="hud-ping">
+				PING: <span class="text-success">-- ms</span>
+			</div>
+			<div class="telemetry-item hud-status">
+				<span class="hud-dot pulse"></span> DEFENSE GRID: <strong>ARMED</strong>
+			</div>
+			<button class="telemetry-cli-btn" onclick="window.toggleCyberCLI()" title="Launch Web CLI Terminal">
+				<span>&gt;_ CLI</span>
+			</button>
+		</div>
+	</aside>
+
+	<!-- Cyber Terminal Modal Engine -->
+	<div id="cyber-cli-modal" class="cyber-cli-overlay" style="display: none;" role="dialog" aria-label="Cyber Terminal">
+		<div class="cyber-cli-window">
+			<div class="cyber-cli-header">
+				<div class="cyber-cli-title">
+					<span class="cli-header-dot red" onclick="window.closeCyberCLI()" title="Close Terminal"></span>
+					<span class="cli-header-dot yellow" title="Minimize"></span>
+					<span class="cli-header-dot green" title="Maximize"></span>
+					<span class="cli-header-label">godzemohan@core-terminal: ~ (bash 5.2)</span>
+				</div>
+				<button class="cyber-cli-close" onclick="window.closeCyberCLI()" aria-label="Close">&times;</button>
+			</div>
+			<div id="cyber-cli-body" class="cyber-cli-body">
+				<div id="cli-output" class="cli-output-area"></div>
+				<div class="cli-input-row">
+					<span class="cli-prompt-user">guest@godzemohan.in</span>:<span class="cli-prompt-path">~</span>$ 
+					<input type="text" id="cli-input" class="cli-input-field" autocomplete="off" spellcheck="false" autofocus>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<!-- Footer -->
 	<footer class="site-footer">
 		<div class="footer-inner">
 			<span class="footer-brand">© 2026 Mohan Kumar K</span>
 			<span class="footer-sep">·</span>
-			<span class="footer-tagline">Crafted with passion & creativity</span>
+			<span class="footer-tagline">Crafted with passion &amp; cybersecurity precision</span>
 		</div>
 	</footer>
 

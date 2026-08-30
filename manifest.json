@@ -1,12 +1,14 @@
 {
-  "name": "Mohan Kumar K | Creative Space",
-  "short_name": "MK Space",
-  "description": "Interactive creative hub, downloads, and AI Assistant of Mohan Kumar K.",
+  "name": "Mohan Kumar K | Cyber Security Hub",
+  "short_name": "GodzeMohan",
+  "description": "Interactive cybersecurity research portal, lab demonstrations, notes, and AI security assistant by Mohan Kumar K.",
   "start_url": "/",
+  "id": "/",
   "display": "standalone",
   "background_color": "#040e09",
-  "theme_color": "#040e09",
-  "orientation": "portrait-primary",
+  "theme_color": "#00ffcc",
+  "orientation": "any",
+  "categories": ["education", "security", "utilities", "productivity"],
   "icons": [
     {
       "src": "logo_transparent.png",
@@ -19,6 +21,27 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "AI Assistant",
+      "short_name": "AI",
+      "description": "Open Mohan's Cyber Security AI Assistant",
+      "url": "/#ai",
+      "icons": [{ "src": "logo_transparent.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Security Notes",
+      "short_name": "Notes",
+      "description": "Access MITM project reports and lab files",
+      "url": "/#files",
+      "icons": [{ "src": "logo_transparent.png", "sizes": "192x192" }]
     }
   ]
 }
