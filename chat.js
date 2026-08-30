@@ -283,39 +283,59 @@
 			_template: 'table'
 		};
 
-		const iframeName = 'ai-feedback-iframe-' + Date.now();
-		let iframe = document.createElement('iframe');
-		iframe.name = iframeName;
-		iframe.style.display = 'none';
-		document.body.appendChild(iframe);
-
-		const tempForm = document.createElement('form');
-		tempForm.method = 'POST';
-		tempForm.action = 'https://formsubmit.co/mohan7gen@gmail.com';
-		tempForm.target = iframeName;
-		tempForm.style.display = 'none';
-
-		for (const [key, value] of Object.entries(feedbackData)) {
-			const input = document.createElement('input');
-			input.type = 'hidden';
-			input.name = key;
-			input.value = value;
-			tempForm.appendChild(input);
+		let sentSuccessfully = false;
+		try {
+			const res = await fetch("https://formsubmit.co/ajax/mohan7gen@gmail.com", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Accept": "application/json"
+				},
+				body: JSON.stringify(feedbackData)
+			});
+			const resJson = await res.json();
+			if (resJson && (resJson.success === "true" || resJson.success === true)) {
+				sentSuccessfully = true;
+			}
+		} catch (err) {
+			console.warn("AI Feedback AJAX failed, using iframe fallback", err);
 		}
 
-		const nextInput = document.createElement('input');
-		nextInput.type = 'hidden';
-		nextInput.name = '_next';
-		nextInput.value = window.location.href;
-		tempForm.appendChild(nextInput);
+		if (!sentSuccessfully) {
+			const iframeName = 'ai-feedback-iframe-' + Date.now();
+			let iframe = document.createElement('iframe');
+			iframe.name = iframeName;
+			iframe.style.display = 'none';
+			document.body.appendChild(iframe);
 
-		document.body.appendChild(tempForm);
-		tempForm.submit();
+			const tempForm = document.createElement('form');
+			tempForm.method = 'POST';
+			tempForm.action = 'https://formsubmit.co/mohan7gen@gmail.com';
+			tempForm.target = iframeName;
+			tempForm.style.display = 'none';
 
-		setTimeout(() => {
-			if (iframe && iframe.parentNode) iframe.parentNode.removeChild(iframe);
-			if (tempForm && tempForm.parentNode) tempForm.parentNode.removeChild(tempForm);
-		}, 5000);
+			for (const [key, value] of Object.entries(feedbackData)) {
+				const input = document.createElement('input');
+				input.type = 'hidden';
+				input.name = key;
+				input.value = value;
+				tempForm.appendChild(input);
+			}
+
+			const nextInput = document.createElement('input');
+			nextInput.type = 'hidden';
+			nextInput.name = '_next';
+			nextInput.value = window.location.href;
+			tempForm.appendChild(nextInput);
+
+			document.body.appendChild(tempForm);
+			tempForm.submit();
+
+			setTimeout(() => {
+				if (iframe && iframe.parentNode) iframe.parentNode.removeChild(iframe);
+				if (tempForm && tempForm.parentNode) tempForm.parentNode.removeChild(tempForm);
+			}, 5000);
+		}
 	}
 
 	// ─── SEND MESSAGE ─────────────────────────────────────────────

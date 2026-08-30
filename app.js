@@ -424,84 +424,89 @@
 					feedbackData._replyto = emailInput.value.trim();
 				}
 
-				// Hidden iframe for seamless submission
-				const iframeName = 'feedback-iframe-' + Date.now();
-				let iframe = document.createElement('iframe');
-				iframe.name = iframeName;
-				iframe.style.display = 'none';
-				document.body.appendChild(iframe);
-
-				const tempForm = document.createElement('form');
-				tempForm.method = 'POST';
-				tempForm.action = 'https://formsubmit.co/mohan7gen@gmail.com';
-				tempForm.target = iframeName;
-				tempForm.enctype = 'multipart/form-data';
-				tempForm.style.display = 'none';
-
-				// Add all fields as hidden inputs
+				// Prepare FormData for FormSubmit AJAX
+				const formData = new FormData();
 				for (const [key, value] of Object.entries(feedbackData)) {
-					const input = document.createElement('input');
-					input.type = 'hidden';
-					input.name = key;
-					input.value = value;
-					tempForm.appendChild(input);
+					formData.append(key, value);
 				}
-
-				// If an attachment file is selected, attach it
 				if (fileInput && fileInput.files && fileInput.files[0]) {
-					const clonedFileInput = fileInput.cloneNode(true);
-					// Copy over files via DataTransfer or append the actual input temporarily
-					tempForm.appendChild(fileInput);
+					formData.append('attachment', fileInput.files[0]);
 				}
 
-				// Add _next to redirect inside iframe
-				const nextInput = document.createElement('input');
-				nextInput.type = 'hidden';
-				nextInput.name = '_next';
-				nextInput.value = window.location.href;
-				tempForm.appendChild(nextInput);
-
-				document.body.appendChild(tempForm);
-				tempForm.submit();
-
-				// Re-insert file input placeholder in the original form if moved
-				if (fileLabel && !document.getElementById('feedback-attachment')) {
-					const newFileInput = document.createElement('input');
-					newFileInput.type = 'file';
-					newFileInput.id = 'feedback-attachment';
-					newFileInput.name = 'attachment';
-					newFileInput.accept = 'image/*,.pdf,.doc,.docx,.txt,.log,.pcap,.json,.zip';
-					newFileInput.style.display = 'none';
-					fileLabel.parentNode.insertBefore(newFileInput, clearFileBtn);
+				let sentSuccessfully = false;
+				try {
+					const ajaxRes = await fetch("https://formsubmit.co/ajax/mohan7gen@gmail.com", {
+						method: "POST",
+						headers: {
+							'Accept': 'application/json'
+						},
+						body: formData
+					});
+					const resData = await ajaxRes.json();
+					if (resData && (resData.success === "true" || resData.success === true)) {
+						sentSuccessfully = true;
+					}
+				} catch (err) {
+					console.warn("Direct AJAX failed, trying iframe fallback", err);
 				}
 
-				// Show contextual success toast
-				setTimeout(() => {
-					if (isSecurityAlert) {
-						window.showToast('🚨 Security Alert: High-priority vulnerability report received and sent to Mohan!', 'alert');
-					} else {
-						window.showToast('Thank you! Your feedback was sent. 🙏', 'heart');
+				if (!sentSuccessfully) {
+					// Fallback to hidden iframe form submit
+					const iframeName = 'feedback-iframe-' + Date.now();
+					let iframe = document.createElement('iframe');
+					iframe.name = iframeName;
+					iframe.style.display = 'none';
+					document.body.appendChild(iframe);
+
+					const tempForm = document.createElement('form');
+					tempForm.method = 'POST';
+					tempForm.action = 'https://formsubmit.co/mohan7gen@gmail.com';
+					tempForm.target = iframeName;
+					tempForm.style.display = 'none';
+
+					for (const [key, value] of Object.entries(feedbackData)) {
+						const input = document.createElement('input');
+						input.type = 'hidden';
+						input.name = key;
+						input.value = value;
+						tempForm.appendChild(input);
 					}
 
-					if (messageInput) messageInput.value = '';
-					if (nameInput) nameInput.value = '';
-					if (emailInput) emailInput.value = '';
-					if (fileText) fileText.textContent = 'Attach Screenshot / File (Optional)';
-					if (fileLabel) fileLabel.classList.remove('has-file');
-					if (clearFileBtn) clearFileBtn.style.display = 'none';
+					const nextInput = document.createElement('input');
+					nextInput.type = 'hidden';
+					nextInput.name = '_next';
+					nextInput.value = window.location.href;
+					tempForm.appendChild(nextInput);
 
-					if (submitBtn) {
-						submitBtn.disabled = false;
-						submitBtn.textContent = 'Send Feedback';
-					}
-					window.toggleFeedback();
+					document.body.appendChild(tempForm);
+					tempForm.submit();
 
-					// Cleanup iframe and temp form after a delay
 					setTimeout(() => {
 						if (iframe && iframe.parentNode) iframe.parentNode.removeChild(iframe);
 						if (tempForm && tempForm.parentNode) tempForm.parentNode.removeChild(tempForm);
 					}, 5000);
-				}, 1500);
+				}
+
+				// Show contextual success toast
+				if (isSecurityAlert) {
+					window.showToast('🚨 Security Alert: High-priority vulnerability report received and sent to Mohan!', 'alert');
+				} else {
+					window.showToast('Thank you! Your feedback was sent. 🙏', 'heart');
+				}
+
+				if (messageInput) messageInput.value = '';
+				if (nameInput) nameInput.value = '';
+				if (emailInput) emailInput.value = '';
+				if (fileInput) fileInput.value = '';
+				if (fileText) fileText.textContent = 'Attach Screenshot / File (Optional)';
+				if (fileLabel) fileLabel.classList.remove('has-file');
+				if (clearFileBtn) clearFileBtn.style.display = 'none';
+
+				if (submitBtn) {
+					submitBtn.disabled = false;
+					submitBtn.textContent = 'Send Feedback';
+				}
+				window.toggleFeedback();
 			});
 		}
 	}
