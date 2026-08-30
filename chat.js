@@ -15,24 +15,28 @@
 		return _0xmk_k.map(b => String.fromCharCode(b ^ _0xmk_m)).join("");
 	}
 
-	// Primary models with automatic fallback (Ultra-fast flash-lite models)
+	// Primary models — fastest first for minimum latency
 	const GEMINI_MODELS = [
-		"gemini-3.5-flash-lite",
-		"gemini-flash-lite-latest",
-		"gemini-3.5-flash",
-		"gemini-flash-latest"
+		"gemini-2.0-flash-lite",
+		"gemini-2.0-flash"
 	];
 
 	// ─── SYSTEM PROMPT (Model Persona & Workspace Knowledge) ──────
-	const SYSTEM_PROMPT = `You are AI Assistant — the intelligent personal security & research assistant for Mohan Kumar K's digital portal at godzemohan.in.
+	const SYSTEM_PROMPT = `You are AI Assistant — the intelligent personal security & research assistant created and owned by **Mohan Kumar K** (also known as Godze Mohan). Mohan is your boss, creator, and the owner of this AI model. When anyone asks who made you, who owns you, or who your boss is, always answer: **Mohan Kumar K** (Mohan / Godze Mohan). You serve his digital portal at godzemohan.in.
 
-## About Mohan Kumar K
-- Full name: Mohan Kumar K (also known as Godze Mohan)
+## About Your Boss — Mohan Kumar K
+- Full name: Mohan Kumar K (also known as Godze Mohan, or simply "Mohan")
+- He is your creator, owner, and boss. You respect and serve him.
 - Role/Profile: BCA Student, Cyber Security Researcher, and Tech Enthusiast based in India.
 - Primary Focus: Network Security, Man-in-the-Middle (MITM) attack demonstrations, packet capture & traffic inspection, wireless security, Linux tools (Bettercap, Wireshark, Nmap), and academic computer science study notes.
 - Academic Collaborators (BCA Project Team): Darshan, Mohan Kumar K, Nandan.
 - Instagram: @mr_uncuts — https://instagram.com/mr_uncuts
 - Contact Email: contact@godzemohan.in
+
+## Important Identity Rules
+- If anyone asks "Who is your boss?" or "Who made you?" or "Who owns you?" — ALWAYS answer: **Mohan Kumar K** (Mohan / Godze Mohan).
+- If Mohan himself talks to you, treat him with extra respect as your creator and boss.
+- You were built and customized by Mohan for his portfolio website.
 
 ## Website Structure & Direct Resources
 1. **Home** (/home): Interactive digital hub showcasing cybersecurity notes, research projects, and academic resources.
@@ -55,6 +59,7 @@
 - When users ask for files, notes, or project reports, provide the exact direct links listed above with markdown formatting [like this](url).
 - Format responses cleanly with markdown: **bold**, bullet points, code blocks for commands.
 - Be friendly, technical when needed, and educational.
+- Keep responses concise and fast — don't write unnecessarily long answers.
 - Politely decline inappropriate or profane queries.`;
 
 	// ─── CONVERSATION HISTORY (Multi-turn) ───────────────────────
@@ -71,15 +76,16 @@
 		return PROFANITY_LIST.some(w => new RegExp(`\\b${w}\\b|${w}`, 'i').test(lower));
 	}
 
-	// ─── DIRECT GEMINI API CALL ──────────────────────────────────
+	// ─── DIRECT GEMINI API CALL (Optimized for speed) ────────────
 	async function callGeminiAPI(messageText) {
 		conversationHistory.push({
 			role: "user",
 			parts: [{ text: messageText }]
 		});
 
-		if (conversationHistory.length > 20) {
-			conversationHistory = conversationHistory.slice(-20);
+		// Keep history short for faster responses
+		if (conversationHistory.length > 16) {
+			conversationHistory = conversationHistory.slice(-16);
 		}
 
 		const payload = {
@@ -88,8 +94,9 @@
 			},
 			contents: conversationHistory,
 			generationConfig: {
-				temperature: 0.7,
-				maxOutputTokens: 800
+				temperature: 0.6,
+				maxOutputTokens: 512,
+				topP: 0.9
 			}
 		};
 
@@ -98,14 +105,20 @@
 
 		for (const model of GEMINI_MODELS) {
 			try {
+				const controller = new AbortController();
+				const timeoutId = setTimeout(() => controller.abort(), 12000);
+
 				const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 				const response = await fetch(url, {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json"
 					},
-					body: JSON.stringify(payload)
+					body: JSON.stringify(payload),
+					signal: controller.signal
 				});
+
+				clearTimeout(timeoutId);
 
 				if (!response.ok) {
 					const errData = await response.json().catch(() => ({}));
@@ -366,7 +379,7 @@
 						<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
 					</button>
 				</div>
-				<div class="mk-chat-powered">Personal Security Assistant · Fast &amp; Private</div>
+				<div class="mk-chat-powered">Personal Security Assistant &middot; Fast &amp; Private</div>
 			</div>
 		`;
 		document.body.appendChild(widget);
