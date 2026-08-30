@@ -1445,6 +1445,26 @@
 		if (modal) modal.style.display = 'none';
 	};
 
+	window.adminClearAnalytics = async function () {
+		if (!confirm('Are you sure you want to delete all stored traffic data? This cannot be undone.')) return;
+		
+		try {
+			const res = await fetch('https://mohan-chatbot.mohan7gen.workers.dev', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ mode: 'analytics_clear', key: 'mohan-core-2026' })
+			});
+			if (res.ok) {
+				window.showToast('Traffic data cleared securely.', 'check');
+				window.adminOpenAnalyticsModal(); // Refresh the table
+			} else {
+				throw new Error('Clear failed.');
+			}
+		} catch (e) {
+			window.showToast('Failed to clear data.', 'error');
+		}
+	};
+
 	// ─── ADMIN SETTINGS & BACKUP ───
 	window.adminOpenSettingsModal = function () {
 		const modal = document.getElementById('modal-settings');
