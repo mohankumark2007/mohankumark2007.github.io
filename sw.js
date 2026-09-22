@@ -4,7 +4,7 @@
  * ============================================================
  */
 
-const CACHE_NAME = 'godzemohan-v4.0';
+const CACHE_NAME = 'godzemohan-v4.2';
 const ASSETS_TO_CACHE = [
 	'/',
 	'/index.html',
@@ -17,7 +17,9 @@ const ASSETS_TO_CACHE = [
 	'/favicon.ico',
 	'/logo_transparent.png',
 	'/apple-touch-icon.png',
-	'/chapters.json'
+	'/chapters.json',
+	'/certificate-iim-bangalore.jpg',
+	'/certificate-iim-bangalore.pdf'
 ];
 
 self.addEventListener('install', (event) => {
