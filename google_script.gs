@@ -1,6 +1,28 @@
-const SPREADSHEET_ID = '1UadaKFmXe8kQsQpwI46idakPhKzI2oiexcwvALitcoM';
+/**
+ * ==============================================================================
+ * GODZEMOHAN.IN — TELEMETRY & LIVE EXECUTIVE ANALYTICS DASHBOARD ENGINE
+ * ==============================================================================
+ * Target Spreadsheet ID: 1UadaKFmXe8kQsQpwI46idakPhKzI2oiexcwvALitcoM
+ * 
+ * Features:
+ * 1. Real-time visitor logging (IP, ISP, Latitude, Longitude, City, Country, UA, Time Spent, Navigation Journey, Actions).
+ * 2. Automated Live Executive Dashboard sheet ("📊 Live Dashboard"):
+ *    - Real-time KPI Scorecards (Total Sessions, Unique Visitors, Top Country, Top City, Top ISP)
+ *    - Live Geographic Distribution Table (Country & City breakdown)
+ *    - Top Internet Service Providers (ISPs) Table
+ *    - Client Device & Screen Resolution Breakdown
+ *    - Top Navigation Trails & Page Journeys
+ *    - Live Stream of Last 15 Sessions with full telemetry
+ * 3. Custom Google Sheets Menu: "⚡ Web Telemetry" -> "📊 Rebuild Live Dashboard"
+ * 4. Dual HTTP API support (doPost & doGet) with lock protection.
+ * ==============================================================================
+ */
 
-// Extended Columns including ISP, Latitude & Longitude
+const SPREADSHEET_ID = '1UadaKFmXe8kQsQpwI46idakPhKzI2oiexcwvALitcoM';
+const DASHBOARD_SHEET_NAME = '📊 Live Dashboard';
+const RAW_SHEET_NAME = '📋 Raw Logs';
+
+// Telemetry Data Columns
 const HEADERS = [
   'Timestamp',
   'IP Address',
@@ -18,23 +40,58 @@ const HEADERS = [
   'Session ID'
 ];
 
+/**
+ * Custom Menu inside Google Sheets interface for 1-click dashboard rebuilding
+ */
+function onOpen() {
+  try {
+    const ui = SpreadsheetApp.getUi();
+    ui.createMenu('⚡ Web Telemetry')
+      .addItem('📊 Rebuild Live Dashboard', 'buildLiveDashboard')
+      .addToUi();
+  } catch (_) {}
+}
+
+/**
+ * Targets the Raw Logs sheet, renaming from Sheet1 if necessary, and formatting headers
+ */
 function getTargetSheet() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheets = ss.getSheets();
   
   let sheet = null;
-  for (let i = 0; i < sheets.length; i++) {
-    if (sheets[i].getSheetId() === 0) {
-      sheet = sheets[i];
-      break;
+  // 1. Look for existing sheet named RAW_SHEET_NAME
+  sheet = ss.getSheetByName(RAW_SHEET_NAME);
+  
+  // 2. If not found, look for original Sheet1 (gid 0) that is not the Dashboard
+  if (!sheet) {
+    for (let i = 0; i < sheets.length; i++) {
+      if (sheets[i].getName() !== DASHBOARD_SHEET_NAME && sheets[i].getSheetId() === 0) {
+        sheet = sheets[i];
+        try {
+          sheet.setName(RAW_SHEET_NAME);
+        } catch (_) {}
+        break;
+      }
     }
   }
-  
+
+  // 3. Fallback to any non-dashboard sheet
   if (!sheet) {
-    sheet = sheets[0];
+    for (let i = 0; i < sheets.length; i++) {
+      if (sheets[i].getName() !== DASHBOARD_SHEET_NAME) {
+        sheet = sheets[i];
+        break;
+      }
+    }
   }
 
-  // If sheet is empty or headers need upgrading
+  // 4. Create new raw sheet if none exists
+  if (!sheet) {
+    sheet = ss.insertSheet(RAW_SHEET_NAME);
+  }
+
+  // Format headers if needed
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(HEADERS);
     formatHeaderRow(sheet);
@@ -74,13 +131,16 @@ function formatHeaderRow(sheet) {
   sheet.setColumnWidth(14, 160); // N: Session ID
 }
 
+/**
+ * Searches for an existing row by Session ID
+ */
 function findRowBySessionId(sheet, sessionId) {
   if (!sessionId) return -1;
   const lastRow = sheet.getLastRow();
   if (lastRow <= 1) return -1;
 
   const sessionCol = HEADERS.indexOf('Session ID') + 1; // Column 14
-  const searchDepth = Math.min(lastRow - 1, 150);
+  const searchDepth = Math.min(lastRow - 1, 200);
   const startRow = lastRow - searchDepth + 1;
   const sessionColumnVals = sheet.getRange(startRow, sessionCol, searchDepth, 1).getValues();
 
@@ -92,6 +152,9 @@ function findRowBySessionId(sheet, sessionId) {
   return -1;
 }
 
+/**
+ * Saves a new visitor row or updates an ongoing session duration & navigation trail
+ */
 function saveOrUpdateSession(data) {
   const sheet = getTargetSheet();
   const sessionId = data.sessionId || data.session_id || '';
@@ -153,6 +216,231 @@ function saveOrUpdateSession(data) {
   return { action: 'inserted', row: newRow, sessionId: sessionId };
 }
 
+/**
+ * ==============================================================================
+ * BUILD / REBUILD THE LIVE EXECUTIVE DASHBOARD IN GOOGLE SHEETS
+ * ==============================================================================
+ * Creates an executive-styled dashboard tab that recalculates LIVE via native formulas.
+ */
+function buildLiveDashboard() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const rawSheet = getTargetSheet();
+  const rawName = rawSheet.getName();
+  const rawRef = "'" + rawName.replace(/'/g, "''") + "'!";
+
+  let dashSheet = ss.getSheetByName(DASHBOARD_SHEET_NAME);
+  if (!dashSheet) {
+    dashSheet = ss.insertSheet(DASHBOARD_SHEET_NAME, 0);
+  } else {
+    // Ensure it is tab 1
+    ss.setActiveSheet(dashSheet);
+    ss.moveActiveSheet(1);
+  }
+
+  // Reset content & styles for clean build
+  dashSheet.clear();
+  dashSheet.clearFormats();
+  dashSheet.setGridlines(true);
+
+  // Set column widths
+  dashSheet.setColumnWidth(1, 24);  // Margin Col A
+  dashSheet.setColumnWidth(2, 175); // Col B
+  dashSheet.setColumnWidth(3, 175); // Col C
+  dashSheet.setColumnWidth(4, 175); // Col D
+  dashSheet.setColumnWidth(5, 175); // Col E
+  dashSheet.setColumnWidth(6, 175); // Col F
+  dashSheet.setColumnWidth(7, 230); // Col G
+  dashSheet.setColumnWidth(8, 230); // Col H
+
+  // ── ROW 2: EXECUTIVE HEADER BANNER ──────────────────────────────────────────
+  dashSheet.setRowHeight(2, 44);
+  dashSheet.getRange('B2:H2').merge();
+  const titleRange = dashSheet.getRange('B2');
+  titleRange.setValue('⚡ GODZEMOHAN.IN — LIVE VISITOR ANALYTICS DASHBOARD');
+  titleRange.setBackground('#0f172a');
+  titleRange.setFontColor('#38bdf8');
+  titleRange.setFontSize(14);
+  titleRange.setFontWeight('bold');
+  titleRange.setFontFamily('Arial');
+  titleRange.setHorizontalAlignment('center');
+  titleRange.setVerticalAlignment('middle');
+
+  // ── ROW 3: STATUS BAR & AUTO-REFRESH CLOCK ──────────────────────────────────
+  dashSheet.setRowHeight(3, 26);
+  dashSheet.getRange('B3:E3').merge();
+  const statusRange = dashSheet.getRange('B3');
+  statusRange.setFormula('="🟢 TELEMETRY FEED: ONLINE | Total Logged Sessions: " & COUNTA(' + rawRef + 'A2:A)');
+  statusRange.setBackground('#1e293b');
+  statusRange.setFontColor('#10b981');
+  statusRange.setFontSize(10);
+  statusRange.setFontWeight('bold');
+  statusRange.setFontFamily('Arial');
+  statusRange.setVerticalAlignment('middle');
+
+  dashSheet.getRange('F3:H3').merge();
+  const refreshRange = dashSheet.getRange('F3');
+  refreshRange.setFormula('="Last Recalculated: " & TEXT(NOW(), "YYYY-MM-DD HH:mm:ss") & " (Live Auto-Update)"');
+  refreshRange.setBackground('#1e293b');
+  refreshRange.setFontColor('#94a3b8');
+  refreshRange.setFontSize(9);
+  refreshRange.setFontFamily('Arial');
+  refreshRange.setHorizontalAlignment('right');
+  refreshRange.setVerticalAlignment('middle');
+
+  // ── ROWS 5 & 6: 5 KPI METRIC SCORECARDS ─────────────────────────────────────
+  dashSheet.setRowHeight(5, 22);
+  dashSheet.setRowHeight(6, 42);
+
+  const cards = [
+    {
+      col: 'B',
+      label: '👥 TOTAL SESSIONS',
+      formula: '=COUNTA(' + rawRef + 'A2:A)',
+      color: '#0284c7',
+      bg: '#f0f9ff',
+      border: '#bae6fd'
+    },
+    {
+      col: 'C',
+      label: '🌐 UNIQUE VISITORS',
+      formula: '=COUNTUNIQUE(' + rawRef + 'B2:B)',
+      color: '#0d9488',
+      bg: '#f0fdfa',
+      border: '#99f6e4'
+    },
+    {
+      col: 'D',
+      label: '📍 TOP COUNTRY',
+      formula: '=IFERROR(INDEX(QUERY(' + rawRef + 'H2:H, "SELECT H, COUNT(H) WHERE H != \'\' AND H != \'Unknown\' GROUP BY H ORDER BY COUNT(H) DESC LIMIT 1 LABEL COUNT(H) \'\'"), 1, 1), "N/A")',
+      color: '#4f46e5',
+      bg: '#eef2ff',
+      border: '#c7d2fe'
+    },
+    {
+      col: 'E',
+      label: '🏙️ TOP CITY',
+      formula: '=IFERROR(INDEX(QUERY(' + rawRef + 'F2:F, "SELECT F, COUNT(F) WHERE F != \'\' AND F != \'Unknown\' GROUP BY F ORDER BY COUNT(F) DESC LIMIT 1 LABEL COUNT(F) \'\'"), 1, 1), "N/A")',
+      color: '#d97706',
+      bg: '#fffbeb',
+      border: '#fde68a'
+    },
+    {
+      col: 'F',
+      label: '📡 TOP ISP / NETWORK',
+      formula: '=IFERROR(INDEX(QUERY(' + rawRef + 'C2:C, "SELECT C, COUNT(C) WHERE C != \'\' AND C != \'Unknown\' GROUP BY C ORDER BY COUNT(C) DESC LIMIT 1 LABEL COUNT(C) \'\'"), 1, 1), "N/A")',
+      color: '#16a34a',
+      bg: '#f0fdf4',
+      border: '#bbf7d0'
+    }
+  ];
+
+  cards.forEach(function(card) {
+    const lblCell = dashSheet.getRange(card.col + '5');
+    lblCell.setValue(card.label);
+    lblCell.setBackground(card.bg);
+    lblCell.setFontColor(card.color);
+    lblCell.setFontSize(9);
+    lblCell.setFontWeight('bold');
+    lblCell.setHorizontalAlignment('center');
+    lblCell.setVerticalAlignment('bottom');
+
+    const valCell = dashSheet.getRange(card.col + '6');
+    valCell.setFormula(card.formula);
+    valCell.setBackground(card.bg);
+    valCell.setFontColor(card.color);
+    valCell.setFontSize(17);
+    valCell.setFontWeight('bold');
+    valCell.setHorizontalAlignment('center');
+    valCell.setVerticalAlignment('middle');
+
+    dashSheet.getRange(card.col + '5:' + card.col + '6').setBorder(true, true, true, true, null, null, card.border, SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+  });
+
+  // ── ROW 8: SECTION HEADERS (GEOGRAPHY & ISPs) ───────────────────────────────
+  dashSheet.setRowHeight(8, 28);
+  dashSheet.getRange('B8:D8').merge();
+  const sec1 = dashSheet.getRange('B8');
+  sec1.setValue('🌍 GEOGRAPHIC DISTRIBUTION (TOP CITIES & COUNTRIES)');
+  sec1.setBackground('#1e293b');
+  sec1.setFontColor('#f8fafc');
+  sec1.setFontWeight('bold');
+  sec1.setFontSize(10);
+  sec1.setVerticalAlignment('middle');
+
+  dashSheet.getRange('E8:H8').merge();
+  const sec2 = dashSheet.getRange('E8');
+  sec2.setValue('📡 INTERNET SERVICE PROVIDERS (ISPs) & TELECOM NETWORKS');
+  sec2.setBackground('#1e293b');
+  sec2.setFontColor('#f8fafc');
+  sec2.setFontWeight('bold');
+  sec2.setFontSize(10);
+  sec2.setVerticalAlignment('middle');
+
+  // ROW 9: Breakdown Queries
+  dashSheet.getRange('B9').setFormula(
+    '=IFERROR(QUERY(' + rawRef + 'F2:H, "SELECT H, F, COUNT(F) WHERE F != \'\' AND F != \'Unknown\' GROUP BY H, F ORDER BY COUNT(F) DESC LIMIT 8 LABEL H \'Country\', F \'City\', COUNT(F) \'Visitors\'"), {"Country", "City", "Visitors"; "No data yet", "—", 0})'
+  );
+
+  dashSheet.getRange('E9').setFormula(
+    '=IFERROR(QUERY(' + rawRef + 'C2:C, "SELECT C, COUNT(C) WHERE C != \'\' AND C != \'Unknown\' GROUP BY C ORDER BY COUNT(C) DESC LIMIT 8 LABEL C \'Internet Service Provider (ISP)\', COUNT(C) \'Sessions\'"), {"Internet Service Provider (ISP)", "Sessions"; "No data yet", 0})'
+  );
+
+  // ── ROW 19: SECTION HEADERS (DEVICES & USER JOURNEYS) ───────────────────────
+  dashSheet.setRowHeight(19, 28);
+  dashSheet.getRange('B19:D19').merge();
+  const sec3 = dashSheet.getRange('B19');
+  sec3.setValue('📱 SCREEN RESOLUTIONS & CLIENT HARDWARE');
+  sec3.setBackground('#1e293b');
+  sec3.setFontColor('#f8fafc');
+  sec3.setFontWeight('bold');
+  sec3.setFontSize(10);
+  sec3.setVerticalAlignment('middle');
+
+  dashSheet.getRange('E19:H19').merge();
+  const sec4 = dashSheet.getRange('E19');
+  sec4.setValue('🧭 TOP NAVIGATION USER JOURNEYS & VISITED PAGES');
+  sec4.setBackground('#1e293b');
+  sec4.setFontColor('#f8fafc');
+  sec4.setFontWeight('bold');
+  sec4.setFontSize(10);
+  sec4.setVerticalAlignment('middle');
+
+  // ROW 20: Device & Journey Queries
+  dashSheet.getRange('B20').setFormula(
+    '=IFERROR(QUERY(' + rawRef + 'J2:J, "SELECT J, COUNT(J) WHERE J != \'\' AND J != \'Unknown\' GROUP BY J ORDER BY COUNT(J) DESC LIMIT 8 LABEL J \'Screen Resolution\', COUNT(J) \'Hits\'"), {"Screen Resolution", "Hits"; "No data yet", 0})'
+  );
+
+  dashSheet.getRange('E20').setFormula(
+    '=IFERROR(QUERY(' + rawRef + 'L2:L, "SELECT L, COUNT(L) WHERE L != \'\' GROUP BY L ORDER BY COUNT(L) DESC LIMIT 8 LABEL L \'Journey Trail\', COUNT(L) \'Users\'"), {"Journey Trail", "Users"; "No data yet", 0})'
+  );
+
+  // ── ROW 30: SECTION HEADER (LIVE VISITOR STREAM) ────────────────────────────
+  dashSheet.setRowHeight(30, 28);
+  dashSheet.getRange('B30:H30').merge();
+  const sec5 = dashSheet.getRange('B30');
+  sec5.setValue('🔴 REAL-TIME VISITOR STREAM (LAST 15 ACTIVE SESSIONS)');
+  sec5.setBackground('#0f172a');
+  sec5.setFontColor('#38bdf8');
+  sec5.setFontWeight('bold');
+  sec5.setFontSize(10);
+  sec5.setVerticalAlignment('middle');
+
+  // ROW 31: Real-time query showing last 15 visitors
+  dashSheet.getRange('B31').setFormula(
+    '=IFERROR(QUERY(' + rawRef + 'A2:M, "SELECT A, B, C, F, H, K, L WHERE A != \'\' ORDER BY A DESC LIMIT 15 LABEL A \'Timestamp\', B \'IP Address\', C \'ISP\', F \'City\', H \'Country\', K \'Duration\', L \'Visited Pages\'"), {"Timestamp","IP Address","ISP","City","Country","Duration","Visited Pages"; "No logs yet","—","—","—","—","—","—"})'
+  );
+
+  return {
+    status: 'success',
+    message: 'Dashboard generated successfully',
+    dashboardTab: DASHBOARD_SHEET_NAME,
+    rawTab: rawName
+  };
+}
+
+/**
+ * Handles POST requests from godzemohan.in telemetry
+ */
 function doPost(e) {
   const lock = LockService.getScriptLock();
   lock.tryLock(10000);
@@ -190,7 +478,32 @@ function doPost(e) {
   }
 }
 
+/**
+ * Handles GET requests:
+ * 1. action=setupDashboard: Rebuilds the executive dashboard
+ * 2. action=log or ip/sessionId: Saves telemetry beacon
+ * 3. Default: Returns all telemetry rows for Admin Portal
+ */
 function doGet(e) {
+  // 1. Dashboard build action
+  if (e && e.parameter && (e.parameter.action === 'setupDashboard' || e.parameter.action === 'buildDashboard')) {
+    try {
+      const res = buildLiveDashboard();
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'success',
+        result: res
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+    } catch (err) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error',
+        message: err.toString()
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  // 2. Telemetry Beacon Logging
   if (e && e.parameter && (e.parameter.ip || e.parameter.sessionId || e.parameter.action === 'log')) {
     try {
       const result = saveOrUpdateSession(e.parameter);
@@ -208,6 +521,7 @@ function doGet(e) {
     }
   }
 
+  // 3. Admin Portal Log Retrieval
   try {
     const sheet = getTargetSheet();
     const lastRow = sheet.getLastRow();
@@ -260,24 +574,10 @@ function doGet(e) {
   }
 }
 
-function testConnection() {
-  const sheet = getTargetSheet();
-  Logger.log('Connected to Sheet: ' + sheet.getName() + ' (GID: ' + sheet.getSheetId() + ')');
-  const result = saveOrUpdateSession({
-    sessionId: 'test_' + Date.now(),
-    timestamp: new Date().toISOString(),
-    ip: '103.110.170.2',
-    isp: 'Bharti Airtel',
-    latitude: '12.9716',
-    longitude: '77.5946',
-    city: 'Bengaluru',
-    region: 'Karnataka',
-    country: 'India',
-    userAgent: 'Manual Diagnostic Test',
-    screenResolution: '1920x1080',
-    timeSpent: '1m 30s',
-    pagesVisited: 'Home [30s] ➔ Files [1m]',
-    activityLog: 'Ran manual test from Apps Script Editor'
-  });
-  Logger.log('Result: ' + JSON.stringify(result));
+/**
+ * Diagnostic test function
+ */
+function testSetupDashboard() {
+  const res = buildLiveDashboard();
+  Logger.log('Dashboard Build Result: ' + JSON.stringify(res));
 }
