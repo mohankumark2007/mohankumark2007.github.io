@@ -1392,51 +1392,14 @@
 	};
 
 	// ─── ADMIN TRAFFIC ANALYTICS ───
+	// ─── ADMIN TRAFFIC ANALYTICS & TELEMETRY STREAM ───
 	window.adminOpenAnalyticsModal = async function () {
 		const modal = document.getElementById('modal-analytics');
 		if (modal) modal.style.display = 'flex';
 		
-		const tbody = document.getElementById('analytics-table-body');
-		const totalEl = document.getElementById('analytics-total-visits');
-		const avgEl = document.getElementById('analytics-avg-duration');
-		
-		if (!tbody) return;
-		tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">Fetching encrypted telemetry from Cloudflare KV...</td></tr>';
-		
-		try {
-			// Master key required for analytics access
-			const verifyRes = await fetch('https://mohan-chatbot.mohan7gen.workers.dev', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ mode: 'analytics_view', key: 'mohan-core-2026' })
-			});
-			
-			if (verifyRes.ok) {
-				const data = await verifyRes.json();
-				if (data.metrics && data.metrics.length > 0) {
-					totalEl.textContent = data.metrics.length;
-					let totalDur = 0;
-					tbody.innerHTML = data.metrics.sort((a,b) => b.timestamp - a.timestamp).map(m => {
-						totalDur += (m.duration || 0);
-						const d = new Date(m.timestamp);
-						return `<tr style="border-bottom: 1px solid #222;">
-							<td style="padding: 8px;">${d.toLocaleDateString()} ${d.toLocaleTimeString()}</td>
-							<td style="padding: 8px; font-size: 0.8em; color: #888;">${m.ua || 'Unknown'}</td>
-							<td style="padding: 8px;">${m.screen || '?'}</td>
-							<td style="padding: 8px; color: #00ffcc;">${m.duration || 0}s</td>
-						</tr>`;
-					}).join('');
-					avgEl.textContent = Math.round(totalDur / data.metrics.length) + 's';
-				} else {
-					tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">No traffic logged yet.</td></tr>';
-					totalEl.textContent = '0';
-					avgEl.textContent = '0s';
-				}
-			} else {
-				throw new Error('Analytics access denied.');
-			}
-		} catch (e) {
-			tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color: #f43f5e;">Error: ${e.message}<br>Make sure Cloudflare KV is configured!</td></tr>`;
+		if (typeof window.loadTelemetryDashboard === 'function') {
+			window.loadTelemetryDashboard();
+			return;
 		}
 	};
 
@@ -1445,36 +1408,62 @@
 		if (modal) modal.style.display = 'none';
 	};
 
-	window.adminClearAnalytics = async function () {
-		if (!confirm('Are you sure you want to delete all stored traffic data? This cannot be undone.')) return;
-		
-		try {
-			const res = await fetch('https://mohan-chatbot.mohan7gen.workers.dev', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ mode: 'analytics_clear', key: 'mohan-core-2026' })
-			});
-			if (res.ok) {
-				window.showToast('Traffic data cleared securely.', 'check');
-				window.adminOpenAnalyticsModal(); // Refresh the table
-			} else {
-				throw new Error('Clear failed.');
-			}
-		} catch (e) {
-			window.showToast('Failed to clear data.', 'error');
-		}
-	};
-
 	// ─── ADMIN SETTINGS & BACKUP ───
 	window.adminOpenSettingsModal = function () {
 		const modal = document.getElementById('modal-settings');
 		const tokenInput = document.getElementById('input-github-token');
+		const scriptUrlInput = document.getElementById('input-google-script-url');
 		if (modal) {
 			const savedToken = localStorage.getItem('mk_github_token');
 			if (tokenInput && savedToken) {
 				tokenInput.value = savedToken;
 			}
+			const savedScriptUrl = localStorage.getItem('GOOGLE_SCRIPT_URL') || (window.TelemetryAdmin ? window.TelemetryAdmin.getActiveScriptUrl() : '');
+			if (scriptUrlInput && savedScriptUrl && savedScriptUrl !== 'YOUR_DEPLOYED_WEB_APP_URL') {
+				scriptUrlInput.value = savedScriptUrl;
+			}
 			modal.style.display = 'flex';
+		}
+	};
+
+	window.adminSaveScriptUrl = function () {
+		const input = document.getElementById('input-google-script-url');
+		const val = input ? input.value.trim() : '';
+		if (!val) {
+			localStorage.removeItem('GOOGLE_SCRIPT_URL');
+			window.showToast('Google Script URL removed.', 'info');
+			return;
+		}
+		if (!val.startsWith('https://script.google.com/')) {
+			window.showToast('URL must begin with https://script.google.com/', 'error');
+			return;
+		}
+		localStorage.setItem('GOOGLE_SCRIPT_URL', val);
+		window.showToast('Google Script URL saved successfully!', 'check');
+	};
+
+	window.adminTestScriptUrl = async function () {
+		const input = document.getElementById('input-google-script-url');
+		const val = input ? input.value.trim() : '';
+		if (!val) {
+			window.showToast('Please enter a Web App URL to test.', 'error');
+			return;
+		}
+		window.showToast('Testing stream connection...', 'info');
+		try {
+			const res = await fetch(val, { method: 'GET' });
+			if (res.ok) {
+				const json = await res.json();
+				if (json.status === 'success') {
+					window.showToast(`Connected! Sheet1 has ${json.count || 0} records.`, 'check');
+				} else {
+					window.showToast('Connected, but sheet returned non-success status.', 'info');
+				}
+			} else {
+				window.showToast(`Test failed: HTTP ${res.status}`, 'error');
+			}
+		} catch (err) {
+			window.showToast('Connection failed: Verify Web App is deployed with access "Anyone".', 'error');
 		}
 	};
 
