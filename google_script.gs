@@ -240,7 +240,6 @@ function buildLiveDashboard() {
   // Reset content & styles for clean build
   dashSheet.clear();
   dashSheet.clearFormats();
-  dashSheet.setGridlines(true);
 
   // Set column widths
   dashSheet.setColumnWidth(1, 24);  // Margin Col A
