@@ -222,12 +222,39 @@
 
     const bodyString = JSON.stringify(payload);
 
+    // 1. Image Beacon (100% reliable across Mobile Safari, Android, and restricted networks)
+    try {
+      const params = new URLSearchParams({
+        action: 'log',
+        sessionId: payload.sessionId || '',
+        timestamp: payload.timestamp || '',
+        ip: payload.ip || '',
+        isp: payload.isp || '',
+        latitude: String(payload.latitude || ''),
+        longitude: String(payload.longitude || ''),
+        city: payload.city || '',
+        region: payload.region || '',
+        country: payload.country || '',
+        userAgent: (payload.userAgent || '').slice(0, 180),
+        screenResolution: payload.screenResolution || '',
+        timeSpent: payload.timeSpent || '',
+        pagesVisited: (payload.pagesVisited || '').slice(0, 250),
+        activityLog: (payload.activityLog || '').slice(-250)
+      });
+      const img = new Image();
+      img.src = `${endpoint}?${params.toString()}`;
+    } catch (_) {}
+
+    // 2. Beacon for page unload
     if (isBeacon && navigator.sendBeacon) {
-      const blob = new Blob([bodyString], { type: 'text/plain;charset=utf-8' });
-      navigator.sendBeacon(endpoint, blob);
+      try {
+        const blob = new Blob([bodyString], { type: 'text/plain;charset=utf-8' });
+        navigator.sendBeacon(endpoint, blob);
+      } catch (_) {}
       return;
     }
 
+    // 3. Standard background POST fetch
     try {
       await fetch(endpoint, {
         method: 'POST',
@@ -237,7 +264,7 @@
         keepalive: true
       });
     } catch (err) {
-      console.debug('[Telemetry] Sync notice:', err.message);
+      console.debug('[Telemetry] Sync note:', err.message);
     }
   }
 
@@ -371,11 +398,14 @@
   async function boot() {
     initUserActivityListeners();
 
-    // Resolve IP & Geolocation
-    await resolveGeoData();
+    // 1. Immediately ping with client/device metrics on arrival
+    syncSessionToGoogleSheets(false);
 
-    // Transmit initial session entry immediately
-    await syncSessionToGoogleSheets(false);
+    // 2. Resolve IP, ISP & GPS coordinates in parallel without waiting
+    resolveGeoData().then(() => {
+      // 3. Immediately update row with full geolocation and ISP details
+      syncSessionToGoogleSheets(false);
+    });
   }
 
   if (document.readyState === 'loading') {

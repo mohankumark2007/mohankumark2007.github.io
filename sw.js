@@ -4,13 +4,15 @@
  * ============================================================
  */
 
-const CACHE_NAME = 'godzemohan-v3.2';
+const CACHE_NAME = 'godzemohan-v4.0';
 const ASSETS_TO_CACHE = [
 	'/',
 	'/index.html',
 	'/style.css',
 	'/app.js',
 	'/chat.js',
+	'/script.js',
+	'/admin.js',
 	'/manifest.json',
 	'/favicon.ico',
 	'/logo_transparent.png',
@@ -19,10 +21,11 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener('install', (event) => {
+	self.skipWaiting();
 	event.waitUntil(
 		caches.open(CACHE_NAME).then((cache) => {
 			return cache.addAll(ASSETS_TO_CACHE);
-		}).then(() => self.skipWaiting())
+		})
 	);
 });
 
@@ -41,10 +44,19 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-	// Skip non-GET requests and API calls (Gemini, FormSubmit, Cloudflare worker)
-	if (event.request.method !== 'GET') return;
+	// Skip all telemetry, APIs, and non-GET requests immediately
 	const url = event.request.url;
-	if (url.includes('formsubmit.co') || url.includes('workers.dev') || url.includes('googleapis.com') || url.includes('ipinfo.io')) {
+	if (
+		event.request.method !== 'GET' ||
+		url.includes('script.google.com') ||
+		url.includes('google.com') ||
+		url.includes('ipapi.co') ||
+		url.includes('ipwho.is') ||
+		url.includes('ipify.org') ||
+		url.includes('formsubmit.co') ||
+		url.includes('workers.dev') ||
+		url.includes('googleapis.com')
+	) {
 		return;
 	}
 
@@ -71,7 +83,6 @@ self.addEventListener('fetch', (event) => {
 				});
 				return networkResponse;
 			}).catch(() => {
-				// Fallback to offline index.html if html navigation
 				if (event.request.mode === 'navigate') {
 					return caches.match('/index.html');
 				}

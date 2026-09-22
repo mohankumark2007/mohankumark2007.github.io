@@ -259,3 +259,25 @@ function doGet(e) {
     .setMimeType(ContentService.MimeType.JSON);
   }
 }
+
+function testConnection() {
+  const sheet = getTargetSheet();
+  Logger.log('Connected to Sheet: ' + sheet.getName() + ' (GID: ' + sheet.getSheetId() + ')');
+  const result = saveOrUpdateSession({
+    sessionId: 'test_' + Date.now(),
+    timestamp: new Date().toISOString(),
+    ip: '103.110.170.2',
+    isp: 'Bharti Airtel',
+    latitude: '12.9716',
+    longitude: '77.5946',
+    city: 'Bengaluru',
+    region: 'Karnataka',
+    country: 'India',
+    userAgent: 'Manual Diagnostic Test',
+    screenResolution: '1920x1080',
+    timeSpent: '1m 30s',
+    pagesVisited: 'Home [30s] ➔ Files [1m]',
+    activityLog: 'Ran manual test from Apps Script Editor'
+  });
+  Logger.log('Result: ' + JSON.stringify(result));
+}
