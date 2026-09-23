@@ -4,7 +4,7 @@
  * ============================================================
  */
 
-const CACHE_NAME = 'godzemohan-v4.4';
+const CACHE_NAME = 'godzemohan-v5.0';
 const ASSETS_TO_CACHE = [
 	'/',
 	'/index.html',

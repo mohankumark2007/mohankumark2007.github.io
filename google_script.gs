@@ -88,8 +88,12 @@ function cleanCorruptedLogs() {
                       userAgent.indexOf('Antigravity Test') !== -1 ||
                       userAgent.indexOf('Node Test') !== -1;
 
-    // 3. Unresolved abandoned placeholder rows
-    const isPlaceholder = (ip === 'Detecting...' || ip === '') && (city === 'Detecting...' || city === '' || city === 'Unknown');
+    // 3. Unresolved abandoned placeholder rows (Detecting... / Unknown / empty)
+    const isPlaceholder = ip.indexOf('Detecting') !== -1 || 
+                          city.indexOf('Detecting') !== -1 || 
+                          isp.indexOf('Detecting') !== -1 || 
+                          ip === '' || 
+                          ip === 'Unknown';
 
     if (isLegacyShifted || isTestRow || isPlaceholder) {
       rowsToDelete.push(rowNum);
@@ -265,9 +269,17 @@ function saveOrUpdateSession(data) {
     return { action: 'updated', row: targetRow, sessionId: sessionId };
   }
 
+  // HARD GUARD: NEVER INSERT A PLACEHOLDER "Detecting..." ROW
+  const rawIp = String(data.ip || data.ipAddress || '').trim();
+  const rawCity = String(data.city || '').trim();
+  const rawIsp = String(data.isp || data.org || '').trim();
+  if (rawIp.indexOf('Detecting') !== -1 || rawCity.indexOf('Detecting') !== -1 || rawIsp.indexOf('Detecting') !== -1 || rawIp === '' || rawIp === 'Unknown') {
+    return { action: 'ignored', reason: 'Placeholder IP rejected - real data required' };
+  }
+
   // INSERT NEW VISITOR ROW
   const timestamp = data.timestamp || new Date().toISOString();
-  const ipAddress = data.ip || data.ipAddress || data.query || 'Unknown';
+  const ipAddress = rawIp;
   const isp = data.isp || data.org || 'Unknown';
   const latitude = data.latitude !== undefined && data.latitude !== null ? String(data.latitude) : '—';
   const longitude = data.longitude !== undefined && data.longitude !== null ? String(data.longitude) : '—';
