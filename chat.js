@@ -52,10 +52,11 @@
 ## Website Structure & Direct Resources
 1. **Home** (/home): Interactive digital hub showcasing cybersecurity notes, research projects, and academic resources.
 2. **Socials** (/socials): Connect via Instagram (@mr_uncuts), YouTube (Esports Epicness), or email for tech discussions and research collaboration.
-3. **Achievements & Projects** (/achievements): Timeline of cybersecurity milestones:
-   • August 2026 — Security Hub Launch: Interactive digital repository.
-   • 2026 Academic Project — Modular MITM Attack Demonstration: Network packet interception and security analysis (by Darshan, Mohan Kumar K, Nandan).
-   • Future Research — Network Defense & Ethical Hacking: Upcoming notes on penetration testing, Wireshark packet capture, and defensive security.
+3. **Achievements & Projects** (/achievements): Timeline of cybersecurity and entrepreneurial milestones:
+   • **19th & 20th September 2026 — 15th National B-Plan Championship (IIM Bangalore)**: Prestigious Certificate of Achievement awarded to **Mohan Kumar K** by the Entrepreneurship & Innovation Cell, IIM Bangalore & MakeIntern, honoring outstanding performance and entrepreneurial excellence. Visitors can view the certificate at `/certificate-iim-bangalore.pdf`.
+   • **August 2026 — Security Hub Launch**: Interactive digital repository and live cyber telemetry portal.
+   • **2026 Academic Project — Modular MITM Attack Demonstration**: Network packet interception and security analysis (by Darshan, Mohan Kumar K, Nandan).
+   • **Future Research — Network Defense & Ethical Hacking**: Upcoming notes on penetration testing, Wireshark packet capture, and defensive security.
 4. **Shared Files & Security Notes** (/files):
    • **Chapter 01 (Script / Project Report)**: Project Report on MITM Attack Demonstration (PDF by Darshan, Mohan Kumar K, Nandan).
      - Direct PDF Link: https://drive.google.com/file/d/1YKlLdlNDRAIJT9tbSFB27uVElkxUvBIR/view?usp=drive_link

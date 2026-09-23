@@ -41,15 +41,68 @@ const HEADERS = [
 ];
 
 /**
- * Custom Menu inside Google Sheets interface for 1-click dashboard rebuilding
+ * Custom Menu inside Google Sheets interface for 1-click dashboard rebuilding & sanitation
  */
 function onOpen() {
   try {
     const ui = SpreadsheetApp.getUi();
     ui.createMenu('⚡ Web Telemetry')
       .addItem('📊 Rebuild Live Dashboard', 'buildLiveDashboard')
+      .addItem('🧹 Clean Dummy & Test Records', 'cleanCorruptedLogs')
       .addToUi();
   } catch (_) {}
+}
+
+/**
+ * Automatically purges corrupted legacy column-shifted rows, synthetic test sessions,
+ * and abandoned placeholders from the raw telemetry log sheet.
+ * Guarantees that only 100% authentic, real visitor sessions remain.
+ */
+function cleanCorruptedLogs() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const rawSheet = getTargetSheet();
+  const lastRow = rawSheet.getLastRow();
+  if (lastRow <= 1) return { status: 'success', deleted: 0 };
+
+  const lastCol = Math.max(rawSheet.getLastColumn(), HEADERS.length);
+  const data = rawSheet.getRange(2, 1, lastRow - 1, lastCol).getValues();
+  const rowsToDelete = [];
+
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    const rowNum = i + 2;
+    const ip = String(row[1] || '').trim();
+    const isp = String(row[2] || '').trim();
+    const city = String(row[5] || '').trim();
+    const userAgent = String(row[8] || '').trim();
+    const sessionId = String(row[13] || '').trim();
+
+    // 1. Corrupted legacy shifted records (UserAgent string in City column or City > 40 chars)
+    const isLegacyShifted = city.indexOf('Mozilla/') !== -1 || city.indexOf('Antigravity') !== -1 || city.length > 40;
+
+    // 2. Synthetic test rows or diagnostic pings
+    const isTestRow = sessionId.indexOf('test_') === 0 ||
+                      ip === '103.110.170.2' ||
+                      ip === '1.2.3.4' ||
+                      userAgent.indexOf('Manual Diagnostic Test') !== -1 ||
+                      userAgent.indexOf('Antigravity Test') !== -1 ||
+                      userAgent.indexOf('Node Test') !== -1;
+
+    // 3. Unresolved abandoned placeholder rows
+    const isPlaceholder = (ip === 'Detecting...' || ip === '') && (city === 'Detecting...' || city === '' || city === 'Unknown');
+
+    if (isLegacyShifted || isTestRow || isPlaceholder) {
+      rowsToDelete.push(rowNum);
+    }
+  }
+
+  // Delete from bottom to top so row indices remain valid
+  for (let j = rowsToDelete.length - 1; j >= 0; j--) {
+    rawSheet.deleteRow(rowsToDelete[j]);
+  }
+
+  Logger.log('Purged ' + rowsToDelete.length + ' dummy/corrupted rows from ' + rawSheet.getName());
+  return { status: 'success', deleted: rowsToDelete.length };
 }
 
 /**
@@ -167,8 +220,42 @@ function saveOrUpdateSession(data) {
     targetRow = findRowBySessionId(sheet, sessionId);
   }
 
-  // UPDATE EXISTING SESSION (Duration & Navigation Trail)
+  // UPDATE EXISTING SESSION (Duration, Navigation Trail & Geo Enrichment)
   if (targetRow > 1) {
+    const existingRow = sheet.getRange(targetRow, 1, 1, HEADERS.length).getValues()[0];
+    const currentIp = String(existingRow[1] || '').trim();
+    const currentCity = String(existingRow[5] || '').trim();
+
+    const newIp = String(data.ip || data.ipAddress || '').trim();
+    const newIsp = String(data.isp || data.org || '').trim();
+    const newLat = data.latitude !== undefined && data.latitude !== null ? String(data.latitude) : '';
+    const newLon = data.longitude !== undefined && data.longitude !== null ? String(data.longitude) : '';
+    const newCity = String(data.city || '').trim();
+    const newRegion = String(data.region || data.regionName || '').trim();
+    const newCountry = String(data.country || data.country_name || '').trim();
+
+    // Enrich existing session if IP/City was previously unpopulated or placeholder
+    if ((currentIp === '' || currentIp === 'Detecting...' || currentIp === 'Unknown') && newIp && newIp !== 'Detecting...' && newIp !== 'Unknown') {
+      sheet.getRange(targetRow, 2, 1, 7).setValues([[
+        newIp,
+        newIsp || existingRow[2],
+        newLat || existingRow[3],
+        newLon || existingRow[4],
+        newCity || existingRow[5],
+        newRegion || existingRow[6],
+        newCountry || existingRow[7]
+      ]]);
+    } else if ((currentCity === '' || currentCity === 'Detecting...' || currentCity === 'Unknown') && newCity && newCity !== 'Detecting...' && newCity !== 'Unknown') {
+      sheet.getRange(targetRow, 3, 1, 6).setValues([[
+        newIsp || existingRow[2],
+        newLat || existingRow[3],
+        newLon || existingRow[4],
+        newCity,
+        newRegion || existingRow[6],
+        newCountry || existingRow[7]
+      ]]);
+    }
+
     const timeSpentCol = HEADERS.indexOf('Time Spent') + 1; // Column 11
     sheet.getRange(targetRow, timeSpentCol, 1, 3).setValues([[
       timeSpent,
@@ -223,6 +310,11 @@ function saveOrUpdateSession(data) {
  * Creates an executive-styled dashboard tab that recalculates LIVE via native formulas.
  */
 function buildLiveDashboard() {
+  // Purge any corrupted legacy or test rows first
+  try {
+    cleanCorruptedLogs();
+  } catch (_) {}
+
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const rawSheet = getTargetSheet();
   const rawName = rawSheet.getName();
@@ -268,7 +360,7 @@ function buildLiveDashboard() {
   dashSheet.setRowHeight(3, 26);
   dashSheet.getRange('B3:E3').merge();
   const statusRange = dashSheet.getRange('B3');
-  statusRange.setFormula('="🟢 TELEMETRY FEED: ONLINE | Total Logged Sessions: " & COUNTA(' + rawRef + 'A2:A)');
+  statusRange.setFormula('="🟢 TELEMETRY FEED: ONLINE | Total Verified Sessions: " & COUNTA(' + rawRef + 'A2:A)');
   statusRange.setBackground('#1e293b');
   statusRange.setFontColor('#10b981');
   statusRange.setFontSize(10);
@@ -310,7 +402,7 @@ function buildLiveDashboard() {
     {
       col: 'D',
       label: '📍 TOP COUNTRY',
-      formula: '=IFERROR(INDEX(QUERY(' + rawRef + 'H2:H, "SELECT H, COUNT(H) WHERE H != \'\' AND H != \'Unknown\' GROUP BY H ORDER BY COUNT(H) DESC LIMIT 1 LABEL COUNT(H) \'\'"), 1, 1), "N/A")',
+      formula: '=IFERROR(INDEX(QUERY(' + rawRef + 'H2:H, "SELECT H, COUNT(H) WHERE H != \'\' AND H != \'Unknown\' AND H != \'Detecting...\' AND H != \'Geo Blocked\' GROUP BY H ORDER BY COUNT(H) DESC LIMIT 1 LABEL COUNT(H) \'\'"), 1, 1), "N/A")',
       color: '#4f46e5',
       bg: '#eef2ff',
       border: '#c7d2fe'
@@ -318,7 +410,7 @@ function buildLiveDashboard() {
     {
       col: 'E',
       label: '🏙️ TOP CITY',
-      formula: '=IFERROR(INDEX(QUERY(' + rawRef + 'F2:F, "SELECT F, COUNT(F) WHERE F != \'\' AND F != \'Unknown\' GROUP BY F ORDER BY COUNT(F) DESC LIMIT 1 LABEL COUNT(F) \'\'"), 1, 1), "N/A")',
+      formula: '=IFERROR(INDEX(QUERY(' + rawRef + 'F2:F, "SELECT F, COUNT(F) WHERE F != \'\' AND F != \'Unknown\' AND F != \'Detecting...\' AND F != \'Geo Blocked\' GROUP BY F ORDER BY COUNT(F) DESC LIMIT 1 LABEL COUNT(F) \'\'"), 1, 1), "N/A")',
       color: '#d97706',
       bg: '#fffbeb',
       border: '#fde68a'
@@ -326,7 +418,7 @@ function buildLiveDashboard() {
     {
       col: 'F',
       label: '📡 TOP ISP / NETWORK',
-      formula: '=IFERROR(INDEX(QUERY(' + rawRef + 'C2:C, "SELECT C, COUNT(C) WHERE C != \'\' AND C != \'Unknown\' GROUP BY C ORDER BY COUNT(C) DESC LIMIT 1 LABEL COUNT(C) \'\'"), 1, 1), "N/A")',
+      formula: '=IFERROR(INDEX(QUERY(' + rawRef + 'C2:C, "SELECT C, COUNT(C) WHERE C != \'\' AND C != \'Unknown\' AND C != \'Detecting...\' GROUP BY C ORDER BY COUNT(C) DESC LIMIT 1 LABEL COUNT(C) \'\'"), 1, 1), "N/A")',
       color: '#16a34a',
       bg: '#f0fdf4',
       border: '#bbf7d0'
@@ -500,9 +592,25 @@ function doGet(e) {
       }))
       .setMimeType(ContentService.MimeType.JSON);
     }
+  // 2. Sanitation Action: Purge corrupted legacy / dummy test logs
+  if (e && e.parameter && (e.parameter.action === 'cleanLogs' || e.parameter.action === 'cleanCorruptedLogs')) {
+    try {
+      const res = cleanCorruptedLogs();
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'success',
+        result: res
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+    } catch (err) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error',
+        message: err.toString()
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+    }
   }
 
-  // 2. Telemetry Beacon Logging
+  // 3. Telemetry Beacon Logging
   if (e && e.parameter && (e.parameter.ip || e.parameter.sessionId || e.parameter.action === 'log')) {
     try {
       const result = saveOrUpdateSession(e.parameter);

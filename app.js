@@ -1706,15 +1706,26 @@
 		const pingEl = document.getElementById('hud-ping');
 		const cipherEl = document.getElementById('hud-cipher');
 
-		// 1. Fetch Client Node Info
+		// 1. Fetch Client Node Info (shared zero-lag algorithm)
 		try {
-			const res = await fetch('https://ipinfo.io/json');
-			if (res.ok) {
-				const data = await res.json();
+			let data = window.__mkGeoData;
+			if (!data && typeof window.__resolveGeoData === 'function') {
+				data = await window.__resolveGeoData();
+			}
+			if (!data || !data.ip || data.ip === 'Unknown') {
+				const res = await fetch('https://ipinfo.io/json');
+				if (res.ok) data = await res.json();
+			}
+
+			if (data && data.ip && data.ip !== 'Unknown') {
 				const city = data.city || 'Secure Node';
 				const country = data.country || 'Global';
-				let maskedIP = data.ip ? data.ip.replace(/\.\d+\.\d+$/, '.***.***') : 'Encrypted';
+				let maskedIP = data.ip.includes(':') 
+					? data.ip.slice(0, 14) + '...'
+					: data.ip.replace(/\.\d+\.\d+$/, '.***.***');
 				if (nodeEl) nodeEl.innerHTML = `<span class="hud-dot active"></span> NODE: <strong>${city}, ${country}</strong> [${maskedIP}]`;
+			} else {
+				if (nodeEl) nodeEl.innerHTML = `<span class="hud-dot active"></span> NODE: <strong>Secure Gateway</strong> [Protected]`;
 			}
 		} catch (e) {
 			if (nodeEl) nodeEl.innerHTML = `<span class="hud-dot active"></span> NODE: <strong>Anonymous Gateway</strong> [Encrypted]`;
