@@ -119,6 +119,7 @@
               ${location}
               ${item.isp && item.isp !== 'Unknown' ? ` • <span style="color:#00ffcc; opacity:0.9;">${item.isp}</span>` : ''}
             </div>
+            ${item.userAgent && item.userAgent !== 'Unknown' ? `<div style="font-size: 0.71rem; color: #a5f3fc; margin-top: 2px; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.userAgent}">📱 ${item.userAgent}</div>` : ''}
           </td>
           <td style="padding: 10px 8px; white-space: nowrap;">
             ${timeBadge}

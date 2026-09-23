@@ -260,6 +260,13 @@ function saveOrUpdateSession(data) {
       ]]);
     }
 
+    // Enrich real device name if previously raw user agent or empty
+    const currentDevice = String(existingRow[8] || '').trim();
+    const newDevice = String(data.userAgent || data.ua || '').trim();
+    if (newDevice && (currentDevice === '' || currentDevice === 'Unknown' || currentDevice.indexOf('Mozilla/') !== -1) && newDevice.indexOf('Mozilla/') === -1) {
+      sheet.getRange(targetRow, 9).setValue(newDevice);
+    }
+
     const timeSpentCol = HEADERS.indexOf('Time Spent') + 1; // Column 11
     sheet.getRange(targetRow, timeSpentCol, 1, 3).setValues([[
       timeSpent,
@@ -354,10 +361,11 @@ function buildLiveDashboard() {
   dashSheet.setColumnWidth(6, 175); // Col F
   dashSheet.setColumnWidth(7, 230); // Col G
   dashSheet.setColumnWidth(8, 230); // Col H
+  dashSheet.setColumnWidth(9, 250); // Col I: Real Device Name
 
   // ── ROW 2: EXECUTIVE HEADER BANNER ──────────────────────────────────────────
   dashSheet.setRowHeight(2, 44);
-  dashSheet.getRange('B2:H2').merge();
+  dashSheet.getRange('B2:I2').merge();
   const titleRange = dashSheet.getRange('B2');
   titleRange.setValue('⚡ GODZEMOHAN.IN — LIVE VISITOR ANALYTICS DASHBOARD');
   titleRange.setBackground('#0f172a');
@@ -488,18 +496,18 @@ function buildLiveDashboard() {
     '=IFERROR(QUERY(' + rawRef + 'C2:C, "SELECT C, COUNT(C) WHERE C != \'\' AND C != \'Unknown\' GROUP BY C ORDER BY COUNT(C) DESC LIMIT 8 LABEL C \'Internet Service Provider (ISP)\', COUNT(C) \'Sessions\'"), {"Internet Service Provider (ISP)", "Sessions"; "No data yet", 0})'
   );
 
-  // ── ROW 19: SECTION HEADERS (DEVICES & USER JOURNEYS) ───────────────────────
+  // ── ROW 19: SECTION HEADERS (REAL DEVICE HARDWARE & USER JOURNEYS) ─────────
   dashSheet.setRowHeight(19, 28);
   dashSheet.getRange('B19:D19').merge();
   const sec3 = dashSheet.getRange('B19');
-  sec3.setValue('📱 SCREEN RESOLUTIONS & CLIENT HARDWARE');
+  sec3.setValue('📱 REAL HARDWARE & VISITOR DEVICE BREAKDOWN');
   sec3.setBackground('#1e293b');
   sec3.setFontColor('#f8fafc');
   sec3.setFontWeight('bold');
   sec3.setFontSize(10);
   sec3.setVerticalAlignment('middle');
 
-  dashSheet.getRange('E19:H19').merge();
+  dashSheet.getRange('E19:I19').merge();
   const sec4 = dashSheet.getRange('E19');
   sec4.setValue('🧭 TOP NAVIGATION USER JOURNEYS & VISITED PAGES');
   sec4.setBackground('#1e293b');
@@ -508,9 +516,9 @@ function buildLiveDashboard() {
   sec4.setFontSize(10);
   sec4.setVerticalAlignment('middle');
 
-  // ROW 20: Device & Journey Queries
+  // ROW 20: Real Device Model & Journey Queries
   dashSheet.getRange('B20').setFormula(
-    '=IFERROR(QUERY(' + rawRef + 'J2:J, "SELECT J, COUNT(J) WHERE J != \'\' AND J != \'Unknown\' GROUP BY J ORDER BY COUNT(J) DESC LIMIT 8 LABEL J \'Screen Resolution\', COUNT(J) \'Hits\'"), {"Screen Resolution", "Hits"; "No data yet", 0})'
+    '=IFERROR(QUERY(' + rawRef + 'I2:I, "SELECT I, COUNT(I) WHERE I != \'\' AND I != \'Unknown\' GROUP BY I ORDER BY COUNT(I) DESC LIMIT 8 LABEL I \'Real Device Name\', COUNT(I) \'Users\'"), {"Real Device Name", "Users"; "No data yet", 0})'
   );
 
   dashSheet.getRange('E20').setFormula(
@@ -519,7 +527,7 @@ function buildLiveDashboard() {
 
   // ── ROW 30: SECTION HEADER (LIVE VISITOR STREAM) ────────────────────────────
   dashSheet.setRowHeight(30, 28);
-  dashSheet.getRange('B30:H30').merge();
+  dashSheet.getRange('B30:I30').merge();
   const sec5 = dashSheet.getRange('B30');
   sec5.setValue('🔴 REAL-TIME VISITOR STREAM (LAST 15 ACTIVE SESSIONS)');
   sec5.setBackground('#0f172a');
@@ -528,9 +536,9 @@ function buildLiveDashboard() {
   sec5.setFontSize(10);
   sec5.setVerticalAlignment('middle');
 
-  // ROW 31: Real-time query showing last 15 visitors
+  // ROW 31: Real-time query showing last 15 visitors with Real Device Name
   dashSheet.getRange('B31').setFormula(
-    '=IFERROR(QUERY(' + rawRef + 'A2:M, "SELECT A, B, C, F, H, K, L WHERE A != \'\' ORDER BY A DESC LIMIT 15 LABEL A \'Timestamp\', B \'IP Address\', C \'ISP\', F \'City\', H \'Country\', K \'Duration\', L \'Visited Pages\'"), {"Timestamp","IP Address","ISP","City","Country","Duration","Visited Pages"; "No logs yet","—","—","—","—","—","—"})'
+    '=IFERROR(QUERY(' + rawRef + 'A2:M, "SELECT A, B, C, F, H, I, K, L WHERE A != \'\' ORDER BY A DESC LIMIT 15 LABEL A \'Timestamp\', B \'IP Address\', C \'ISP\', F \'City\', H \'Country\', I \'Real Device\', K \'Duration\', L \'Visited Pages\'"), {"Timestamp","IP Address","ISP","City","Country","Real Device","Duration","Visited Pages"; "No logs yet","—","—","—","—","—","—","—"})'
   );
 
   return {

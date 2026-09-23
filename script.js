@@ -215,6 +215,143 @@
   // Expose resolver globally so app.js HUD can share it
   window.__resolveGeoData = resolveGeoData;
 
+  // ─── 2.1 HIGH-PRECISION REAL DEVICE IDENTIFIER ────────────────
+  let cachedDeviceName = null;
+
+  function beautifyModel(rawModel) {
+    if (!rawModel) return '';
+    const clean = rawModel.trim();
+    if (/^SM-[A-Z0-9]+/i.test(clean)) return `Samsung Galaxy (${clean})`;
+    if (/^CPH[0-9]+/i.test(clean)) return `OnePlus/Oppo (${clean})`;
+    if (/^Pixel/i.test(clean)) return `Google ${clean}`;
+    if (/^2[0-9]{6}[A-Z]+/i.test(clean)) return `Xiaomi/Redmi (${clean})`;
+    if (/^vivo/i.test(clean) || /^V2[0-9]+/i.test(clean)) return `Vivo (${clean})`;
+    if (/^RMX[0-9]+/i.test(clean)) return `Realme (${clean})`;
+    if (/^moto/i.test(clean) || /^XT[0-9]+/i.test(clean)) return `Motorola (${clean})`;
+    return clean;
+  }
+
+  async function resolveRealDevice() {
+    if (cachedDeviceName) return cachedDeviceName;
+
+    let model = '';
+    let os = '';
+    let browser = '';
+    let gpu = '';
+    const ua = navigator.userAgent || '';
+
+    // 1. Hardware WebGL GPU Extraction
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (gl) {
+        const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+        if (dbg) {
+          const raw = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '';
+          gpu = raw
+            .replace(/^ANGLE\s*\(/i, '')
+            .replace(/\,.*$/, '')
+            .replace(/\(TM\)/gi, '')
+            .replace(/\(R\)/gi, '')
+            .replace(/Direct3D.*$/i, '')
+            .replace(/vs_.*$/i, '')
+            .trim();
+        }
+      }
+    } catch (_) {}
+
+    // 2. High-Entropy Client Hints (Android, Chrome, Edge, Chromium)
+    if (navigator.userAgentData && typeof navigator.userAgentData.getHighEntropyValues === 'function') {
+      try {
+        const hints = await navigator.userAgentData.getHighEntropyValues([
+          'model',
+          'platform',
+          'platformVersion'
+        ]);
+        if (hints.model && hints.model.trim()) {
+          model = beautifyModel(hints.model.trim());
+        }
+        if (hints.platform) {
+          os = hints.platform;
+          if (hints.platformVersion) {
+            const major = parseInt(hints.platformVersion.split('.')[0], 10);
+            if (hints.platform === 'Android' && major) {
+              os = `Android ${major}`;
+            } else if (hints.platform === 'Windows') {
+              os = major >= 13 ? 'Windows 11' : (major > 0 ? 'Windows 10' : 'Windows');
+            } else if (hints.platform === 'macOS') {
+              os = major >= 15 ? 'macOS Sequoia' : (major >= 14 ? 'macOS Sonoma' : 'macOS');
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    // 3. Apple Device Profiling (iPhone / iPad / Mac)
+    if (/iPhone/i.test(ua)) {
+      os = 'iOS';
+      const vMatch = ua.match(/OS (\d+[_\d]*)/i);
+      if (vMatch) os = 'iOS ' + vMatch[1].replace(/_/g, '.');
+
+      const w = window.screen.width;
+      const h = window.screen.height;
+      const minD = Math.min(w, h);
+      const maxD = Math.max(w, h);
+
+      if (minD === 430 && maxD === 932) model = 'iPhone 15 Pro Max / 14 Pro Max';
+      else if (minD === 393 && maxD === 852) model = 'iPhone 15 Pro / 15 / 14 Pro';
+      else if (minD === 428 && maxD === 926) model = 'iPhone 14 Plus / 13 Pro Max';
+      else if (minD === 390 && maxD === 844) model = 'iPhone 14 / 13 / 12 Pro';
+      else if (minD === 375 && maxD === 812) model = 'iPhone 13 mini / 12 mini / X';
+      else if (minD === 414 && maxD === 896) model = 'iPhone 11 Pro Max / XR';
+      else model = 'Apple iPhone';
+    } else if (/iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+      os = 'iPadOS';
+      model = 'Apple iPad';
+    } else if (/Macintosh|Mac OS X/i.test(ua)) {
+      if (!os.startsWith('macOS')) os = 'macOS';
+      const isM = gpu.includes('Apple') || (navigator.maxTouchPoints !== undefined && navigator.maxTouchPoints === 0 && !gpu.includes('Intel'));
+      model = isM ? `Apple Mac (${gpu || 'Apple Silicon'})` : `Apple Mac (${gpu || 'Intel'})`;
+    } else if (/Android/i.test(ua)) {
+      if (!os.startsWith('Android')) {
+        const aMatch = ua.match(/Android\s+([0-9.]+)/i);
+        os = aMatch ? `Android ${aMatch[1]}` : 'Android';
+      }
+      if (!model) {
+        const buildMatch = ua.match(/;\s*([^;]+)\s+Build\//i);
+        if (buildMatch && buildMatch[1] && !buildMatch[1].includes('Android') && buildMatch[1] !== 'K') {
+          model = beautifyModel(buildMatch[1].trim());
+        } else if (gpu) {
+          model = `Android Smartphone [${gpu}]`;
+        } else {
+          model = 'Android Smartphone';
+        }
+      }
+    } else if (/Windows/i.test(ua)) {
+      if (!os.startsWith('Windows')) os = 'Windows PC';
+      model = gpu ? `PC [${gpu}]` : 'Windows Desktop';
+    } else if (/Linux/i.test(ua)) {
+      if (!os) os = 'Linux';
+      model = gpu ? `Linux PC [${gpu}]` : 'Linux Workstation';
+    }
+
+    // 4. Browser Resolution
+    if (/Edg\//i.test(ua)) browser = 'Edge';
+    else if (/Chrome\//i.test(ua)) browser = 'Chrome';
+    else if (/Safari\//i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
+    else if (/Firefox\//i.test(ua)) browser = 'Firefox';
+
+    // 5. Assemble Real Human-Readable Device Signature
+    const parts = [];
+    if (model) parts.push(model);
+    if (os && !model.includes(os)) parts.push(os);
+    if (browser) parts.push(browser);
+
+    const deviceSignature = parts.join(' • ') || (ua ? ua.slice(0, 80) : 'Unknown Device');
+    cachedDeviceName = deviceSignature;
+    return deviceSignature;
+  }
+
   // ─── 3. TRANSMISSION PIPELINE TO GOOGLE SHEETS ────────────────
   let isSyncing = false;
 
@@ -228,6 +365,8 @@
         await resolveGeoData();
       } catch (_) {}
     }
+
+    const realDevice = await resolveRealDevice();
 
     const geo = cachedGeo || {
       ip: 'Secure Client',
@@ -249,7 +388,7 @@
       city: geo.city,
       region: geo.region,
       country: geo.country,
-      userAgent: navigator.userAgent || 'Unknown',
+      userAgent: realDevice,
       screenResolution: `${window.screen.width || 0}x${window.screen.height || 0}`,
       timeSpent: getTotalTimeSpentString(),
       pagesVisited: getPagesVisitedSummary(),
