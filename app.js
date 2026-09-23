@@ -1701,51 +1701,65 @@
 	}
 
 	// ─── LIVE CYBER TELEMETRY HUD ────────────────────────────────
+	// ─── LIVE CYBER TELEMETRY HUD ────────────────────────────────
 	async function initTelemetryHUD() {
 		const nodeEl = document.getElementById('hud-node');
 		const pingEl = document.getElementById('hud-ping');
 		const cipherEl = document.getElementById('hud-cipher');
 
-		// 1. Fetch Client Node Info (shared zero-lag algorithm)
-		try {
-			let data = window.__mkGeoData;
-			if (!data && typeof window.__resolveGeoData === 'function') {
-				data = await window.__resolveGeoData();
-			}
-			if (!data || !data.ip || data.ip === 'Unknown') {
-				const res = await fetch('https://ipinfo.io/json');
-				if (res.ok) data = await res.json();
-			}
-
-			if (data && data.ip && data.ip !== 'Unknown') {
-				const city = data.city || 'Secure Node';
-				const country = data.country || 'Global';
-				let maskedIP = data.ip.includes(':') 
-					? data.ip.slice(0, 14) + '...'
-					: data.ip.replace(/\.\d+\.\d+$/, '.***.***');
-				if (nodeEl) nodeEl.innerHTML = `<span class="hud-dot active"></span> NODE: <strong>${city}, ${country}</strong> [${maskedIP}]`;
-			} else {
-				if (nodeEl) nodeEl.innerHTML = `<span class="hud-dot active"></span> NODE: <strong>Secure Gateway</strong> [Protected]`;
-			}
-		} catch (e) {
-			if (nodeEl) nodeEl.innerHTML = `<span class="hud-dot active"></span> NODE: <strong>Anonymous Gateway</strong> [Encrypted]`;
+		// 1. Instant Render from cache if present (0ms delay, no flash)
+		function renderNode(info) {
+			if (!nodeEl || !info || !info.ip || info.ip === 'Unknown') return;
+			const city = info.city || 'Secure Node';
+			const country = info.country || 'Global';
+			let maskedIP = info.ip.includes(':') 
+				? info.ip.slice(0, 14) + '...'
+				: info.ip.replace(/\.\d+\.\d+$/, '.***.***');
+			nodeEl.innerHTML = `<span class="hud-dot active"></span> NODE: <strong>${city}, ${country}</strong> [${maskedIP}]`;
 		}
 
-		// 2. Measure Live Ping Latency
-		async function measurePing() {
+		try {
+			let data = window.__mkGeoData;
+			if (!data) {
+				const stored = sessionStorage.getItem('mk_geo_data');
+				if (stored) data = JSON.parse(stored);
+			}
+			if (data && data.ip && data.ip !== 'Unknown') {
+				renderNode(data);
+			}
+
+			// If not yet available, resolve fast asynchronously
+			if (!data || !data.ip || data.ip === 'Unknown') {
+				if (typeof window.__resolveGeoData === 'function') {
+					data = await window.__resolveGeoData();
+				} else {
+					const res = await fetch('https://ipinfo.io/json');
+					if (res.ok) data = await res.json();
+				}
+				if (data && data.ip) renderNode(data);
+			}
+		} catch (e) {
+			if (nodeEl && (!nodeEl.innerHTML || nodeEl.innerHTML.includes('Scanning'))) {
+				nodeEl.innerHTML = `<span class="hud-dot active"></span> NODE: <strong>Secure Gateway</strong> [Protected]`;
+			}
+		}
+
+		// 2. Measure Live Ping Latency using Navigation Timing (0 HTTP requests, zero lag)
+		function measurePing() {
 			if (!pingEl) return;
-			const start = performance.now();
 			try {
-				await fetch('/favicon.ico?' + Date.now(), { method: 'HEAD', cache: 'no-store' });
-				const duration = Math.round(performance.now() - start);
+				const nav = performance.getEntriesByType('navigation')[0];
+				let duration = 24;
+				if (nav && nav.responseStart && nav.requestStart) {
+					duration = Math.max(12, Math.round(nav.responseStart - nav.requestStart));
+				}
 				pingEl.innerHTML = `PING: <span class="${duration < 100 ? 'text-success' : 'text-accent'}">${duration} ms</span>`;
-			} catch (e) {
-				pingEl.innerHTML = `PING: <span class="text-success">24 ms</span>`;
+			} catch (_) {
+				pingEl.innerHTML = `PING: <span class="text-success">22 ms</span>`;
 			}
 		}
 
 		measurePing();
-		setInterval(measurePing, 10000);
 	}
 
 	// ─── TRAFFIC ANALYTICS TRACKER ───────────────────────────────

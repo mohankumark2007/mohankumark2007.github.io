@@ -4,7 +4,7 @@
  * ============================================================
  */
 
-const CACHE_NAME = 'godzemohan-v4.3';
+const CACHE_NAME = 'godzemohan-v4.4';
 const ASSETS_TO_CACHE = [
 	'/',
 	'/index.html',
@@ -52,6 +52,7 @@ self.addEventListener('fetch', (event) => {
 		event.request.method !== 'GET' ||
 		url.includes('script.google.com') ||
 		url.includes('google.com') ||
+		url.includes('ipinfo.io') ||
 		url.includes('ipapi.co') ||
 		url.includes('ipwho.is') ||
 		url.includes('ipify.org') ||

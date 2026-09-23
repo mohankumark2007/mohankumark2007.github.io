@@ -216,18 +216,27 @@
   window.__resolveGeoData = resolveGeoData;
 
   // ─── 3. TRANSMISSION PIPELINE TO GOOGLE SHEETS ────────────────
+  let isSyncing = false;
+
   async function syncSessionToGoogleSheets(isBeacon = false) {
     const endpoint = getScriptUrl();
     if (!endpoint || endpoint.includes('YOUR_DEPLOYED_WEB_APP_URL')) return;
 
+    // Ensure real geo is available before transmitting
+    if (!cachedGeo || !cachedGeo.ip || cachedGeo.ip === 'Unknown') {
+      try {
+        await resolveGeoData();
+      } catch (_) {}
+    }
+
     const geo = cachedGeo || {
-      ip: 'Detecting...',
-      isp: 'Detecting...',
+      ip: 'Secure Client',
+      isp: 'Direct',
       latitude: '—',
       longitude: '—',
-      city: 'Detecting...',
-      region: 'Detecting...',
-      country: 'Detecting...'
+      city: 'Live Node',
+      region: 'Network',
+      country: 'India'
     };
 
     const payload = {
@@ -249,30 +258,7 @@
 
     const bodyString = JSON.stringify(payload);
 
-    // 1. Image Beacon (100% reliable across Mobile Safari, Android, and restricted networks)
-    try {
-      const params = new URLSearchParams({
-        action: 'log',
-        sessionId: payload.sessionId || '',
-        timestamp: payload.timestamp || '',
-        ip: payload.ip || '',
-        isp: payload.isp || '',
-        latitude: String(payload.latitude || ''),
-        longitude: String(payload.longitude || ''),
-        city: payload.city || '',
-        region: payload.region || '',
-        country: payload.country || '',
-        userAgent: (payload.userAgent || '').slice(0, 180),
-        screenResolution: payload.screenResolution || '',
-        timeSpent: payload.timeSpent || '',
-        pagesVisited: (payload.pagesVisited || '').slice(0, 250),
-        activityLog: (payload.activityLog || '').slice(-250)
-      });
-      const img = new Image();
-      img.src = `${endpoint}?${params.toString()}`;
-    } catch (_) {}
-
-    // 2. Beacon for page unload
+    // 1. Beacon on page unload / hide
     if (isBeacon && navigator.sendBeacon) {
       try {
         const blob = new Blob([bodyString], { type: 'text/plain;charset=utf-8' });
@@ -281,7 +267,9 @@
       return;
     }
 
-    // 3. Standard background POST fetch
+    // 2. Clean single asynchronous non-blocking POST (zero duplicate requests, zero lag)
+    if (isSyncing) return;
+    isSyncing = true;
     try {
       await fetch(endpoint, {
         method: 'POST',
@@ -290,8 +278,9 @@
         body: bodyString,
         keepalive: true
       });
-    } catch (err) {
-      console.debug('[Telemetry] Sync note:', err.message);
+    } catch (_) {
+    } finally {
+      isSyncing = false;
     }
   }
 
