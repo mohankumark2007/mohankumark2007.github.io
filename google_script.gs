@@ -592,6 +592,8 @@ function doGet(e) {
       }))
       .setMimeType(ContentService.MimeType.JSON);
     }
+  }
+
   // 2. Sanitation Action: Purge corrupted legacy / dummy test logs
   if (e && e.parameter && (e.parameter.action === 'cleanLogs' || e.parameter.action === 'cleanCorruptedLogs')) {
     try {
